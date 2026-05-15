@@ -12,6 +12,10 @@ function App() {
   const [activeCategory, setActiveCategory] = useState('signature');
   const [cart, setCart] = useState([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const [cartHeight, setCartHeight] = useState(40);
+  const [isDraggingCart, setIsDraggingCart] = useState(false);
+  const cartDragRef = useRef({ isDragging: false, startY: 0, startHeight: 40, hasDragged: false, currentHeight: 40 });
+
   const [activeModal, setActiveModal] = useState('MAIN');
   const [activeDetailItem, setActiveDetailItem] = useState(null);
   const [currentOptions, setCurrentOptions] = useState({});
@@ -32,22 +36,85 @@ function App() {
   const [isA11yMode, setIsA11yMode] = useState(false);
 
   // ⭐️ [추가한 부분] 장바구니 스와이프 제스처 상태
-  const [swipeData, setSwipeData] = useState({ id: null, startX: 0, currentX: 0 });
+  const [swipeData, setSwipeData] = useState({ id: null, startX: 0, currentX: 0, isDragging: false });
 
-  const handleTouchStart = (e, uniqueKey) => setSwipeData({ id: uniqueKey, startX: e.touches[0].clientX, currentX: 0 });
-  const handleTouchMove = (e, uniqueKey) => {
-    if (swipeData.id === uniqueKey) {
-      setSwipeData(prev => ({ ...prev, currentX: e.touches[0].clientX - prev.startX }));
+  const handleDragStart = (e, uniqueKey) => {
+    const clientX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
+    setSwipeData({ id: uniqueKey, startX: clientX, currentX: 0, isDragging: true });
+  };
+  const handleDragMove = (e, uniqueKey) => {
+    if (swipeData.id === uniqueKey && swipeData.isDragging) {
+      const clientX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
+      setSwipeData(prev => ({ ...prev, currentX: clientX - prev.startX }));
     }
   };
-  const handleTouchEnd = (e, uniqueKey) => {
-    if (swipeData.id === uniqueKey) {
-      if (swipeData.currentX < -80) removeItemCompletely(uniqueKey);
-      setSwipeData({ id: null, startX: 0, currentX: 0 });
+  const handleDragEnd = (e, uniqueKey) => {
+    if (swipeData.id === uniqueKey && swipeData.isDragging) {
+      if (swipeData.currentX < -80) {
+        removeItemCompletely(uniqueKey);
+      }
+      setSwipeData({ id: null, startX: 0, currentX: 0, isDragging: false });
     }
   };
 
-  // ⭐️ 백엔드 데이터 페칭 로직 추가
+  // ⭐️ 장바구니 상하 스와이프 드래그 리사이즈 로직
+  const handleCartDragStart = (e) => {
+    if (window.innerWidth > 1024) return;
+    const clientY = e.type.includes('mouse') ? e.clientY : e.touches[0].clientY;
+    const initialHeight = isCartOpen ? cartHeight : (75 / window.innerHeight * 100);
+    cartDragRef.current = { isDragging: true, startY: clientY, startHeight: initialHeight, hasDragged: false, currentHeight: initialHeight };
+    setIsDraggingCart(true); 
+  };
+
+  useEffect(() => {
+    const handleMove = (e) => {
+      if (!cartDragRef.current.isDragging) return;
+      const clientY = e.type.includes('mouse') ? e.clientY : e.touches[0].clientY;
+      const deltaY = clientY - cartDragRef.current.startY;
+      
+      if (Math.abs(deltaY) > 5) {
+        cartDragRef.current.hasDragged = true;
+        const vhDelta = (deltaY / window.innerHeight) * 100;
+        let newHeight = cartDragRef.current.startHeight - vhDelta;
+        
+        if (newHeight > 90) newHeight = 90;
+        if (newHeight < 12) newHeight = 12;
+        
+        cartDragRef.current.currentHeight = newHeight;
+        setCartHeight(newHeight);
+        
+        setIsCartOpen(prev => {
+          if (!prev && newHeight > 15) return true;
+          return prev;
+        });
+      }
+    };
+
+    const handleEnd = () => {
+      if (!cartDragRef.current.isDragging) return;
+      cartDragRef.current.isDragging = false;
+      setIsDraggingCart(false);
+      
+      if (cartDragRef.current.hasDragged) {
+        if (cartDragRef.current.currentHeight < 20) {
+          setIsCartOpen(false);
+          setCartHeight(40);
+        }
+      }
+    };
+
+    window.addEventListener('mousemove', handleMove);
+    window.addEventListener('mouseup', handleEnd);
+    window.addEventListener('touchmove', handleMove, { passive: false });
+    window.addEventListener('touchend', handleEnd);
+
+    return () => {
+      window.removeEventListener('mousemove', handleMove);
+      window.removeEventListener('mouseup', handleEnd);
+      window.removeEventListener('touchmove', handleMove);
+      window.removeEventListener('touchend', handleEnd);
+    };
+  }, []);
   useEffect(() => {
     fetch('http://localhost:8080/api/menus')
       .then(res => res.json())
@@ -751,8 +818,20 @@ function App() {
         </div>
       </main>
 
-      <aside className={`order-container ${isCartOpen ? 'open' : ''}`}>
-        <div className="cart-header" onClick={() => window.innerWidth <= 1024 && setIsCartOpen(!isCartOpen)}>
+      <aside 
+        className={`order-container ${isCartOpen ? 'open' : ''} ${isDraggingCart ? 'dragging' : ''}`}
+        style={{ '--cart-height': `${cartHeight}vh` }}
+      >
+        <div 
+          className="cart-header" 
+          onClick={() => {
+            if (window.innerWidth <= 1024 && !cartDragRef.current.hasDragged) setIsCartOpen(!isCartOpen);
+          }}
+          onTouchStart={handleCartDragStart}
+          onMouseDown={handleCartDragStart}
+          style={{ cursor: window.innerWidth <= 1024 ? 'grab' : 'default', position: 'relative' }}
+        >
+          <div className="drag-handle-pill"></div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flex: 1 }}>
             <h3 className="cart-title" style={{ margin: 0 }}>내 주문 내역 ({cart.length})</h3>
             <span className="cart-toggle-icon" style={{ display: window.innerWidth <= 1024 ? 'inline-block' : 'none', fontSize: '1.2rem', color: '#888', transform: isCartOpen ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.3s' }}>▲</span>
@@ -767,23 +846,33 @@ function App() {
             <div style={{ textAlign: 'center', color: '#999', marginTop: window.innerWidth <= 768 ? '10px' : '100px' }}>선택된 메뉴가 없습니다.</div>
           ) : (
             cartWithUniqueKey.map((item) => {
-              const isSwiping = swipeData.id === item.uniqueKey;
+              const isSwiping = swipeData.id === item.uniqueKey && swipeData.isDragging;
               const tx = isSwiping && swipeData.currentX < 0 ? Math.max(swipeData.currentX, -100) : 0;
               return (
                 /* ⭐️ [추가한 부분] 모바일 스와이프 제스처 삭제 처리를 위한 Wrapper */
-                <div key={item.uniqueKey} className="cart-item-wrapper">
-                  <div className="swipe-delete-bg">
+                <div key={item.uniqueKey} className="cart-item-wrapper" style={{ background: 'transparent' }}>
+                  <div 
+                    className="swipe-delete-bg" 
+                    onClick={() => removeItemCompletely(item.uniqueKey)} 
+                    style={{ cursor: 'pointer', opacity: tx < 0 ? 1 : 0, transition: 'opacity 0.2s' }}
+                  >
                     🗑️ 삭제
                   </div>
                   <div
                     className="cart-item"
-                    onTouchStart={(e) => handleTouchStart(e, item.uniqueKey)}
-                    onTouchMove={(e) => handleTouchMove(e, item.uniqueKey)}
-                    onTouchEnd={(e) => handleTouchEnd(e, item.uniqueKey)}
+                    onTouchStart={(e) => handleDragStart(e, item.uniqueKey)}
+                    onTouchMove={(e) => handleDragMove(e, item.uniqueKey)}
+                    onTouchEnd={(e) => handleDragEnd(e, item.uniqueKey)}
+                    onMouseDown={(e) => handleDragStart(e, item.uniqueKey)}
+                    onMouseMove={(e) => handleDragMove(e, item.uniqueKey)}
+                    onMouseUp={(e) => handleDragEnd(e, item.uniqueKey)}
+                    onMouseLeave={(e) => handleDragEnd(e, item.uniqueKey)}
                     style={{
                       transform: `translateX(${tx}px)`,
                       transition: isSwiping ? 'none' : 'transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
-                      margin: 0
+                      margin: 0,
+                      cursor: isSwiping ? 'grabbing' : 'grab',
+                      userSelect: 'none'
                     }}
                   >
                     <div style={{ flex: 1 }}>
@@ -800,7 +889,7 @@ function App() {
                         <span>{item.count}</span>
                         <button onClick={() => changeCount(item.uniqueKey, 1)}>+</button>
                       </div>
-                      <button className="delete-btn" onClick={() => removeItemCompletely(item.uniqueKey)}>✖</button>
+                      <button className="delete-btn" onClick={() => removeItemCompletely(item.uniqueKey)} onTouchEnd={(e) => { e.stopPropagation(); removeItemCompletely(item.uniqueKey); }}>✖</button>
                     </div>
                   </div>
                 </div>

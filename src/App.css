@@ -328,7 +328,7 @@
   position: relative;
 }
 .receipt::before { /* 영수증 상단 지그재그 효과 제거, 모던하게 */
-  content: ''; position: absolute; top: -10px; left: 0; right: 0; height: 10px; background: var(--mm-primary); border-radius: 10px 10px 0 0;
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 15px; background: var(--mm-primary); border-radius: 20px 20px 0 0;
 }
 .receipt h2 { text-align: center; color: var(--mm-dark); margin-top: 5px; font-weight: 900; letter-spacing: 2px; font-size: 1.8rem;}
 .receipt-list { margin: 25px 0; border-top: 2px dashed #ccc; border-bottom: 2px dashed #ccc; padding: 20px 0; line-height: 1.8; }
@@ -405,9 +405,10 @@
   .main-bottom-area { display: none; }
   .pay-btn { padding: 24px 60px; font-size: 1.6rem; border-radius: 20px; }
 
-  .order-container { position: fixed; bottom: 0; left: 0; width: 100%; max-width: none; flex: none; height: 35vh; transform: translateY(calc(100% - 75px)); border-left: none; border-top: 1px solid rgba(255,255,255,0.5); border-radius: 30px 30px 0 0; z-index: 100; box-shadow: 0 -10px 30px rgba(0,0,0,0.2); display: flex; flex-direction: column; transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1); }
+  .order-container { position: fixed; bottom: 0; left: 0; width: 100%; max-width: none; flex: none; height: var(--cart-height, 40vh); transform: translateY(calc(100% - 75px)); border-left: none; border-top: 1px solid rgba(255,255,255,0.5); border-radius: 30px 30px 0 0; z-index: 100; box-shadow: 0 -10px 30px rgba(0,0,0,0.2); display: flex; flex-direction: column; transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1), height 0.35s cubic-bezier(0.2, 0.8, 0.2, 1); }
   .order-container.open { transform: translateY(0); }
-  .cart-header { border-radius: 30px 30px 0 0; padding: 15px 25px; height: 75px; display: flex; align-items: center; cursor: pointer; }
+  .order-container.dragging { transition: none !important; }
+  .cart-header { border-radius: 30px 30px 0 0; padding: 15px 25px; height: 75px; display: flex; align-items: center; cursor: grab; user-select: none; }
   .cart-title { font-size: 1.2rem; margin: 0; flex: 1; }
   .mic-btn { width: 60px; height: 60px; font-size: 1.6rem; }
   
@@ -424,6 +425,22 @@
   .menu-img-placeholder, .menu-card img { height: 85px; border-radius: 8px; margin-bottom: 10px; }
   .menu-name { font-size: 1.25rem; margin-bottom: 4px; }
   .menu-price { font-size: 1.25rem; }
+
+  .drag-handle-pill {
+    display: block;
+    width: 40px;
+    height: 5px;
+    background: rgba(0,0,0,0.2);
+    border-radius: 10px;
+    position: absolute;
+    top: 6px;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+}
+
+.drag-handle-pill {
+  display: none;
 }
 
 /* =========================================================================
@@ -458,9 +475,6 @@
 /* =========================================================================
    ⭐️ [추가한 부분] 고령자 및 접근성(돋보기) 모드 오버라이딩 스타일
    ========================================================================= */
-.app-container.a11y-mode {
-  --font-main: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif; /* 가독성 높은 폰트 강제 적용 */
-}
 .app-container.a11y-mode * {
   letter-spacing: -0.5px;
 }
