@@ -21,6 +21,17 @@ function App() {
   const [currentOptions, setCurrentOptions] = useState({});
   const [currentModalQty, setCurrentModalQty] = useState(1);
 
+  const [toastMessage, setToastMessage] = useState("");
+  const toastTimeoutRef = useRef(null);
+
+  const showToast = (msg) => {
+    setToastMessage(msg);
+    if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
+    toastTimeoutRef.current = setTimeout(() => {
+      setToastMessage("");
+    }, 3000);
+  };
+
   const [orderQueue, setOrderQueue] = useState([]);
   const [lastProcessingPaymentMethod, setLastProcessingPaymentMethod] = useState('');
   const [isListening, setIsListening] = useState(false);
@@ -63,7 +74,7 @@ function App() {
     const clientY = e.type.includes('mouse') ? e.clientY : e.touches[0].clientY;
     const initialHeight = isCartOpen ? cartHeight : (75 / window.innerHeight * 100);
     cartDragRef.current = { isDragging: true, startY: clientY, startHeight: initialHeight, hasDragged: false, currentHeight: initialHeight };
-    setIsDraggingCart(true); 
+    setIsDraggingCart(true);
   };
 
   useEffect(() => {
@@ -71,18 +82,18 @@ function App() {
       if (!cartDragRef.current.isDragging) return;
       const clientY = e.type.includes('mouse') ? e.clientY : e.touches[0].clientY;
       const deltaY = clientY - cartDragRef.current.startY;
-      
+
       if (Math.abs(deltaY) > 5) {
         cartDragRef.current.hasDragged = true;
         const vhDelta = (deltaY / window.innerHeight) * 100;
         let newHeight = cartDragRef.current.startHeight - vhDelta;
-        
+
         if (newHeight > 90) newHeight = 90;
         if (newHeight < 12) newHeight = 12;
-        
+
         cartDragRef.current.currentHeight = newHeight;
         setCartHeight(newHeight);
-        
+
         setIsCartOpen(prev => {
           if (!prev && newHeight > 15) return true;
           return prev;
@@ -94,7 +105,7 @@ function App() {
       if (!cartDragRef.current.isDragging) return;
       cartDragRef.current.isDragging = false;
       setIsDraggingCart(false);
-      
+
       if (cartDragRef.current.hasDragged) {
         if (cartDragRef.current.currentHeight < 20) {
           setIsCartOpen(false);
@@ -116,7 +127,8 @@ function App() {
     };
   }, []);
   useEffect(() => {
-    fetch('http://localhost:8080/api/menus')
+    const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
+    fetch(`${API_BASE_URL}/api/menus`)
       .then(res => res.json())
       .then(data => {
         // 백엔드의 평면적인 리스트를 카테고리별 객체로 변환
@@ -211,7 +223,8 @@ function App() {
     setAiRecommendations([]);
 
     try {
-      const response = await fetch("http://localhost:8080/api/ai/recommend", {
+      const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
+      const response = await fetch(`${API_BASE_URL}/api/ai/recommend`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ message: text }),
@@ -360,7 +373,7 @@ function App() {
         if (spacelessText.includes("에이드") || spacelessText.includes("주스")) { handleCategoryClick('ade'); return; }
         if (spacelessText.includes("차") || spacelessText.includes("티")) { handleCategoryClick('tea'); return; }
 
-        if (!isListening) alert(`메뉴를 찾지 못했습니다.\n(인식된 말: "${text}")`);
+        if (!isListening) showToast(`메뉴를 찾지 못했습니다.\n(인식된 말: "${text}")`);
         return;
       }
 
@@ -525,7 +538,7 @@ function App() {
     }
 
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SpeechRecognition) return alert("크롬 브라우저를 사용해 주세요.");
+    if (!SpeechRecognition) return showToast("크롬 브라우저를 사용해 주세요.");
 
     if (!recognitionRef.current) {
       recognitionRef.current = new SpeechRecognition();
@@ -575,7 +588,7 @@ function App() {
     setActiveDetailItem(item);
     setCurrentModalQty(qty);
     setActiveModal('DETAIL');
-    
+
     if (preSelectedOptions) {
       setCurrentOptions(preSelectedOptions);
     } else {
@@ -594,7 +607,7 @@ function App() {
   };
 
   const startPaymentFlow = () => {
-    if (cart.length === 0) return alert("담긴 메뉴가 없습니다.");
+    if (cart.length === 0) return showToast("담긴 메뉴가 없습니다.");
     setOrderType('매장');
     setActiveModal('PAYMENT');
   };
@@ -818,12 +831,12 @@ function App() {
         </div>
       </main>
 
-      <aside 
+      <aside
         className={`order-container ${isCartOpen ? 'open' : ''} ${isDraggingCart ? 'dragging' : ''}`}
         style={{ '--cart-height': `${cartHeight}vh` }}
       >
-        <div 
-          className="cart-header" 
+        <div
+          className="cart-header"
           onClick={() => {
             if (window.innerWidth <= 1024 && !cartDragRef.current.hasDragged) setIsCartOpen(!isCartOpen);
           }}
@@ -851,9 +864,9 @@ function App() {
               return (
                 /* ⭐️ [추가한 부분] 모바일 스와이프 제스처 삭제 처리를 위한 Wrapper */
                 <div key={item.uniqueKey} className="cart-item-wrapper" style={{ background: 'transparent' }}>
-                  <div 
-                    className="swipe-delete-bg" 
-                    onClick={() => removeItemCompletely(item.uniqueKey)} 
+                  <div
+                    className="swipe-delete-bg"
+                    onClick={() => removeItemCompletely(item.uniqueKey)}
                     style={{ cursor: 'pointer', opacity: tx < 0 ? 1 : 0, transition: 'opacity 0.2s' }}
                   >
                     🗑️ 삭제
@@ -996,6 +1009,12 @@ function App() {
             <div className="wave-bar"></div>
           </div>
           <div className="listening-text">말말이가 듣고 있습니다...</div>
+        </div>
+      )}
+      {/* [추가한 부분] 커스텀 토스트 메시지 UI */}
+      {toastMessage && (
+        <div className="toast-message">
+          {toastMessage.split('\n').map((line, idx) => <div key={idx}>{line}</div>)}
         </div>
       )}
     </div>

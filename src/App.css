@@ -583,3 +583,35 @@
   color: var(--mm-primary);
   letter-spacing: 1px;
 }
+
+/* =========================================================================
+   ⭐️ [추가한 부분] 토스트 메시지 (알림창) UI
+   ========================================================================= */
+.toast-message {
+  position: fixed;
+  bottom: 120px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(44, 26, 26, 0.9); /* 딥 버건디 톤의 다크 배경 */
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  color: white;
+  padding: 15px 30px;
+  border-radius: 30px;
+  font-size: 1.1rem;
+  font-weight: 800;
+  text-align: center;
+  z-index: 9999;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  animation: fadeInOut 3s ease-in-out forwards;
+  pointer-events: none;
+  line-height: 1.4;
+  white-space: nowrap;
+}
+
+@keyframes fadeInOut {
+  0% { opacity: 0; transform: translate(-50%, 20px); }
+  10% { opacity: 1; transform: translate(-50%, 0); }
+  90% { opacity: 1; transform: translate(-50%, 0); }
+  100% { opacity: 0; transform: translate(-50%, -20px); }
+}
