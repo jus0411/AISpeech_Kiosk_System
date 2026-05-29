@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import './App.css';
 import { numWords, menuAliasesByName, optionOptions } from './data';
+let isPaymentConfirming = false;
 
 function App() {
   const [isSplashScreen, setIsSplashScreen] = useState(true);
@@ -30,6 +31,30 @@ function App() {
     toastTimeoutRef.current = setTimeout(() => {
       setToastMessage("");
     }, 3000);
+  };
+
+  const speakTTS = (text) => {
+    if (!window.speechSynthesis) return;
+    window.speechSynthesis.cancel();
+    
+    // 마크다운 강조(별표) 등의 특수 기호를 소리 내어 읽지 않도록 정제
+    const cleanText = text ? text.replace(/\*/g, "") : "";
+    
+    const utterance = new SpeechSynthesisUtterance(cleanText);
+    utterance.lang = 'ko-KR';
+    utterance.rate = 1.05; // refined pacing rate
+    
+    const voices = window.speechSynthesis.getVoices();
+    // Prioritize high-quality natural female Korean voice
+    const femaleVoice = voices.find(v => 
+      v.lang === 'ko-KR' && 
+      (v.name.includes('SunHi') || v.name.includes('Natural') || v.name.includes('Google') || v.name.includes('female') || v.name.includes('여성'))
+    ) || voices.find(v => v.lang === 'ko-KR');
+
+    if (femaleVoice) {
+      utterance.voice = femaleVoice;
+    }
+    window.speechSynthesis.speak(utterance);
   };
 
   const [orderQueue, setOrderQueue] = useState([]);
@@ -127,7 +152,7 @@ function App() {
     };
   }, []);
   useEffect(() => {
-    const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
+    const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8081';
     fetch(`${API_BASE_URL}/api/menus`)
       .then(res => res.json())
       .then(data => {
@@ -146,6 +171,83 @@ function App() {
         console.error("데이터를 가져오는데 실패했습니다:", err);
         setLoading(false);
       });
+  }, []);
+
+  // 결제 리다이렉션 승인 및 데이터 복원 처리
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const paymentSuccess = params.get('payment_success');
+    const paymentFail = params.get('payment_fail');
+    const paymentKey = params.get('paymentKey');
+    const orderId = params.get('orderId');
+    const amount = params.get('amount');
+
+    if (paymentSuccess === 'true' && paymentKey && orderId && amount) {
+      if (isPaymentConfirming) return;
+      isPaymentConfirming = true;
+
+      // 1. localStorage에서 결제 전 장바구니 및 수령 방식 복원
+      const savedCart = localStorage.getItem("malmal_kiosk_cart");
+      const savedOrderType = localStorage.getItem("malmal_kiosk_orderType");
+      if (savedCart) {
+        setCart(JSON.parse(savedCart));
+      }
+      if (savedOrderType) {
+        setOrderType(savedOrderType);
+      }
+
+      // 2. 화면을 PROCESSING(결제 처리 중) 상태로 전환
+      setLastProcessingPaymentMethod("카드");
+      setActiveModal('PROCESSING');
+      setIsSplashScreen(false); // 스플래시 화면 건너뛰기
+
+      // 3. 백엔드에 결제 승인 요청 보냄
+      const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8081';
+      fetch(`${API_BASE_URL}/api/payments/confirm`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          paymentKey: paymentKey,
+          orderId: orderId,
+          amount: Number(amount)
+        })
+      })
+      .then(res => {
+        if (!res.ok) throw new Error("승인 실패");
+        return res.json();
+      })
+      .then(data => {
+        // 결제 승인 성공 시 영수증 모달 출력 및 음성 피드백
+        setActiveModal('RECEIPT');
+        speakTTS("결제가 완료되었습니다. 이용해 주셔서 감사합니다.");
+        
+        // URL 파라미터 지우기 (새로고침 시 재요청 방지)
+        window.history.replaceState({}, document.title, window.location.pathname);
+        // localStorage 임시 데이터 삭제
+        localStorage.removeItem("malmal_kiosk_cart");
+        localStorage.removeItem("malmal_kiosk_orderType");
+        localStorage.removeItem("malmal_kiosk_totalAmount");
+      })
+      .catch(err => {
+        console.error("결제 승인 오류:", err);
+        isPaymentConfirming = false;
+        showToast("결제 승인에 실패했습니다. 다시 시도해 주세요.");
+        setActiveModal('MAIN');
+        window.history.replaceState({}, document.title, window.location.pathname);
+      });
+    } else if (paymentFail === 'true') {
+      // 결제 실패 처리
+      const savedCart = localStorage.getItem("malmal_kiosk_cart");
+      if (savedCart) {
+        setCart(JSON.parse(savedCart));
+      }
+      showToast("결제가 취소되었거나 실패했습니다.");
+      setActiveModal('MAIN');
+      setIsSplashScreen(false);
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
   }, []);
 
   const recognitionTimeoutRef = useRef(null);
@@ -223,7 +325,7 @@ function App() {
     setAiRecommendations([]);
 
     try {
-      const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
+      const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8081';
       const response = await fetch(`${API_BASE_URL}/api/ai/recommend`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -257,6 +359,7 @@ function App() {
       });
 
       setAiMessage(reply);
+      speakTTS(reply);
       // 만약 매칭된 카드가 없다면(드물게 발생), 전체 메뉴 중 랜덤으로 2개라도 띄워주기 (빈 화면 방지)
       setAiRecommendations(recommendedItems.length > 0 ? recommendedItems : allMenus.sort(() => 0.5 - Math.random()).slice(0, 2));
     } catch (error) {
@@ -356,175 +459,192 @@ function App() {
         }
       });
 
-      if (foundItems.length === 0) {
-        const isSwitchingCategory = (spacelessText.includes("시그니처") || spacelessText.includes("세트") || spacelessText.includes("커피") || spacelessText.includes("에스프레소") || spacelessText.includes("논커피") || spacelessText.includes("디저트") || spacelessText.includes("푸드") || spacelessText.includes("에이드") || spacelessText.includes("주스") || spacelessText.includes("차") || spacelessText.includes("티")) && !spacelessText.includes("추천");
+      // 사용자의 명시적인 추천/대화 의도 및 주문 의도 키워드 감지
+      const isRecommendationIntent = spacelessText.includes("추천") || 
+                                     spacelessText.includes("우울") || 
+                                     spacelessText.includes("기분") || 
+                                     spacelessText.includes("도와") || 
+                                     spacelessText.includes("도움") || 
+                                     spacelessText.includes("어때") || 
+                                     spacelessText.includes("알려줘") || 
+                                     spacelessText.includes("소개") || 
+                                     (spacelessText.includes("뭐가") && spacelessText.includes("맛있"));
 
-        if ((spacelessText.includes("추천") || activeCategory === 'ai_recommend') && !isSwitchingCategory) {
-          if (activeCategory !== 'ai_recommend') handleCategoryClick('ai_recommend');
-          fetchAiRecommendation(text);
-          return;
+      // 만약 메뉴 매칭이 되었고, 명시적인 추천 의도가 아니라면 바로 주문 모달 노출/장바구니 추가 처리 진행
+      if (foundItems.length > 0 && !isRecommendationIntent) {
+        let validItems = [];
+        foundItems.forEach(current => {
+          const isOverlappedAndShorter = foundItems.some(other => {
+            if (current === other) return false;
+            const currentStart = current.index, currentEnd = current.index + current.nameLength;
+            const otherStart = other.index, otherEnd = other.index + other.nameLength;
+            if (Math.max(currentStart, otherStart) < Math.min(currentEnd, otherEnd)) {
+              return current.nameLength < other.nameLength || (current.nameLength === other.nameLength && current.item.id > other.item.id);
+            }
+            return false;
+          });
+          if (!isOverlappedAndShorter) validItems.push(current);
+        });
+
+        validItems.sort((a, b) => a.index - b.index);
+
+        const actions = [];
+        validItems.forEach((found, i) => {
+          const itemEnd = found.index + found.nameLength;
+          const restOfText = spacelessText.substring(itemEnd);
+
+          const removeMatch = restOfText.match(/취소|빼|삭제|없애/);
+          const addMatch = restOfText.match(/추가|담|줘|주문|시킬/);
+
+          let itemAction = 'ADD';
+          if (removeMatch) {
+            if (!addMatch) {
+              itemAction = 'REMOVE';
+            } else if (removeMatch.index < addMatch.index) {
+              itemAction = 'REMOVE';
+            }
+          }
+
+          const nextIndex = i + 1 < validItems.length ? validItems[i + 1].index : spacelessText.length;
+          const chunk = spacelessText.substring(itemEnd, nextIndex);
+          let qty = 1;
+          const digitMatch = chunk.match(/\d+/);
+          if (digitMatch) qty = parseInt(digitMatch[0], 10);
+          else for (let nw of numWords) if (chunk.includes(nw.word)) { qty = nw.num; break; }
+
+          actions.push({ type: itemAction, item: found.item, qty });
+        });
+
+        let newQueue = [];
+        let directAddActions = [];
+        let itemsToRemove = [];
+
+        actions.forEach(action => {
+          if (action.type === 'REMOVE') {
+            itemsToRemove.push(action.item);
+          } else {
+            if (action.item.type === 'NONE') {
+              action.options = {};
+              action.optionKey = "{}";
+              directAddActions.push(action);
+            } else {
+              let defaultOpts = { shot: "없음" };
+              if (action.item.type !== 'NONE') {
+                defaultOpts = {
+                  temp: action.item.type === 'HOT' || action.item.type === 'BOTH' ? 'HOT' : 'ICE',
+                  ice: action.item.type === 'ICE' ? '얼음 중간' : '없음',
+                  sweetness: '50% (기본)',
+                  pearl: '없음',
+                  shot: "없음"
+                };
+              }
+
+              let newOptions = { ...defaultOpts };
+              let isDirectAdd = false;
+
+              if (spacelessText.match(/기본|그냥|바로/)) {
+                isDirectAdd = true;
+              }
+
+              const updateOpt = (key, val) => { newOptions[key] = val; };
+
+              if (action.item.type !== 'HOT') {
+                if (spacelessText.includes("얼음조금")) updateOpt("ice", "얼음 조금");
+                if (spacelessText.includes("얼음중간")) updateOpt("ice", "얼음 중간");
+                if (spacelessText.includes("얼음많이")) updateOpt("ice", "얼음 많이");
+                if (spacelessText.includes("얼음없이") || spacelessText.includes("얼음빼고")) updateOpt("ice", "없음");
+              }
+
+              if (spacelessText.includes("핫") || spacelessText.includes("따뜻한") || spacelessText.includes("따듯한") || spacelessText.includes("뜨아") || spacelessText.includes("핫초코")) {
+                if (action.item.type !== 'ICE') {
+                  updateOpt("temp", "HOT");
+                  newOptions.ice = "없음";
+                }
+              }
+              if (spacelessText.includes("아이스") || spacelessText.includes("차가운") || spacelessText.includes("아아") || spacelessText.includes("아이스초코")) {
+                if (action.item.type !== 'HOT') {
+                  updateOpt("temp", "ICE");
+                  if (newOptions.ice === "없음" && !spacelessText.includes("얼음없이") && !spacelessText.includes("얼음빼고")) newOptions.ice = "얼음 중간";
+                }
+              }
+
+              if (spacelessText.includes("당도30")) updateOpt("sweetness", "30%");
+              if (spacelessText.includes("당도50") || spacelessText.includes("당도기본")) updateOpt("sweetness", "50% (기본)");
+              if (spacelessText.includes("당도70")) updateOpt("sweetness", "70%");
+              if (spacelessText.includes("당도100")) updateOpt("sweetness", "100%");
+
+              if (spacelessText.includes("펄추가")) updateOpt("pearl", "타피오카 펄 추가");
+              if (spacelessText.includes("화이트펄추가") || spacelessText.includes("알로에펄추가")) updateOpt("pearl", "화이트 펄 추가");
+              if (spacelessText.includes("펄없이") || spacelessText.includes("펄빼고")) updateOpt("pearl", "없음");
+
+              if (spacelessText.includes("샷추가")) updateOpt("shot", "에스프레소 샷 추가 (+500원)");
+              if (spacelessText.includes("샷없이") || spacelessText.includes("샷빼고")) updateOpt("shot", "없음");
+
+              if (isDirectAdd) {
+                action.options = newOptions;
+                action.optionKey = JSON.stringify(newOptions);
+                directAddActions.push(action);
+              } else {
+                newQueue.push({ item: action.item, qty: action.qty, options: newOptions });
+              }
+            }
+          }
+        });
+
+        if (itemsToRemove.length > 0) {
+          setCart(prevCart => {
+            let newCart = [...prevCart];
+            itemsToRemove.forEach(item => { newCart = newCart.filter(cartItem => cartItem.id !== item.id); });
+            return newCart;
+          });
         }
 
-        if (spacelessText.includes("시그니처")) { handleCategoryClick('signature'); return; }
-        if (spacelessText.includes("세트")) { handleCategoryClick('set'); return; }
-        if (spacelessText.includes("커피") || spacelessText.includes("에스프레소")) { handleCategoryClick('caffeine'); return; }
-        if (spacelessText.includes("논커피")) { handleCategoryClick('noncoffee'); return; }
-        if (spacelessText.includes("디저트") || spacelessText.includes("푸드")) { handleCategoryClick('dessert'); return; }
-        if (spacelessText.includes("에이드") || spacelessText.includes("주스")) { handleCategoryClick('ade'); return; }
-        if (spacelessText.includes("차") || spacelessText.includes("티")) { handleCategoryClick('tea'); return; }
+        if (directAddActions.length > 0) {
+          setCart(prevCart => {
+            let newCart = [...prevCart];
+            directAddActions.forEach(action => {
+              let price = action.item.price;
+              if (action.options && action.options.shot === "에스프레소 샷 추가 (+500원)") price += 500;
 
-        if (!isListening) showToast(`메뉴를 찾지 못했습니다.\n(인식된 말: "${text}")`);
+              const existingIdx = newCart.findIndex(i => i.id === action.item.id && i.optionKey === action.optionKey);
+              if (existingIdx !== -1) {
+                newCart[existingIdx] = { ...newCart[existingIdx], count: newCart[existingIdx].count + action.qty, price };
+              } else {
+                newCart.push({ ...action.item, count: action.qty, options: action.options || {}, optionKey: action.optionKey || "{}", price });
+              }
+            });
+            return newCart;
+          });
+        }
+
+        if (newQueue.length > 0) {
+          setOrderQueue(newQueue);
+          openDetailModal(newQueue[0].item, newQueue[0].qty, newQueue[0].options);
+        }
         return;
       }
 
-      let validItems = [];
-      foundItems.forEach(current => {
-        const isOverlappedAndShorter = foundItems.some(other => {
-          if (current === other) return false;
-          const currentStart = current.index, currentEnd = current.index + current.nameLength;
-          const otherStart = other.index, otherEnd = other.index + other.nameLength;
-          if (Math.max(currentStart, otherStart) < Math.min(currentEnd, otherEnd)) {
-            return current.nameLength < other.nameLength || (current.nameLength === other.nameLength && current.item.id > other.item.id);
-          }
-          return false;
-        });
-        if (!isOverlappedAndShorter) validItems.push(current);
-      });
+      // 메뉴 매칭이 없거나 명시적인 추천 의도가 포함된 경우 (자연어 기반 AI 추천 폴백 라우팅)
+      if (foundItems.length === 0 || isRecommendationIntent) {
+        const isSwitchingCategory = (spacelessText.includes("시그니처") || spacelessText.includes("세트") || spacelessText.includes("커피") || spacelessText.includes("에스프레소") || spacelessText.includes("논커피") || spacelessText.includes("디저트") || spacelessText.includes("푸드") || spacelessText.includes("에이드") || spacelessText.includes("주스") || spacelessText.includes("차") || spacelessText.includes("티")) && !spacelessText.includes("추천");
 
-      validItems.sort((a, b) => a.index - b.index);
-
-      const actions = [];
-      validItems.forEach((found, i) => {
-        const itemEnd = found.index + found.nameLength;
-        const restOfText = spacelessText.substring(itemEnd);
-
-        const removeMatch = restOfText.match(/취소|빼|삭제|없애/);
-        const addMatch = restOfText.match(/추가|담|줘|주문|시킬/);
-
-        let itemAction = 'ADD';
-        if (removeMatch) {
-          if (!addMatch) {
-            itemAction = 'REMOVE';
-          } else if (removeMatch.index < addMatch.index) {
-            itemAction = 'REMOVE';
-          }
+        // 1. 카테고리 전환 명령어가 감지되었다면 화면 즉시 전환
+        if (isSwitchingCategory) {
+          if (spacelessText.includes("시그니처")) { handleCategoryClick('signature'); return; }
+          if (spacelessText.includes("세트")) { handleCategoryClick('set'); return; }
+          if (spacelessText.includes("커피") || spacelessText.includes("에스프레소")) { handleCategoryClick('caffeine'); return; }
+          if (spacelessText.includes("논커피")) { handleCategoryClick('noncoffee'); return; }
+          if (spacelessText.includes("디저트") || spacelessText.includes("푸드")) { handleCategoryClick('dessert'); return; }
+          if (spacelessText.includes("에이드") || spacelessText.includes("주스")) { handleCategoryClick('ade'); return; }
+          if (spacelessText.includes("차") || spacelessText.includes("티")) { handleCategoryClick('tea'); return; }
         }
 
-        const nextIndex = i + 1 < validItems.length ? validItems[i + 1].index : spacelessText.length;
-        const chunk = spacelessText.substring(itemEnd, nextIndex);
-        let qty = 1;
-        const digitMatch = chunk.match(/\d+/);
-        if (digitMatch) qty = parseInt(digitMatch[0], 10);
-        else for (let nw of numWords) if (chunk.includes(nw.word)) { qty = nw.num; break; }
-
-        actions.push({ type: itemAction, item: found.item, qty });
-      });
-
-      let newQueue = [];
-      let directAddActions = [];
-      let itemsToRemove = [];
-
-      actions.forEach(action => {
-        if (action.type === 'REMOVE') {
-          itemsToRemove.push(action.item);
-        } else {
-          if (action.item.type === 'NONE') {
-            action.options = {};
-            action.optionKey = "{}";
-            directAddActions.push(action);
-          } else {
-            let defaultOpts = { shot: "없음" };
-            if (action.item.type !== 'NONE') {
-              defaultOpts = {
-                temp: action.item.type === 'HOT' || action.item.type === 'BOTH' ? 'HOT' : 'ICE',
-                ice: action.item.type === 'ICE' ? '얼음 중간' : '없음',
-                sweetness: '50% (기본)',
-                pearl: '없음',
-                shot: "없음"
-              };
-            }
-
-            let newOptions = { ...defaultOpts };
-            let isDirectAdd = false;
-
-            if (spacelessText.match(/기본|그냥|바로/)) {
-              isDirectAdd = true;
-            }
-
-            const updateOpt = (key, val) => { newOptions[key] = val; };
-
-            if (action.item.type !== 'HOT') {
-              if (spacelessText.includes("얼음조금")) updateOpt("ice", "얼음 조금");
-              if (spacelessText.includes("얼음중간")) updateOpt("ice", "얼음 중간");
-              if (spacelessText.includes("얼음많이")) updateOpt("ice", "얼음 많이");
-              if (spacelessText.includes("얼음없이") || spacelessText.includes("얼음빼고")) updateOpt("ice", "없음");
-            }
-
-            if (spacelessText.includes("핫") || spacelessText.includes("따뜻한") || spacelessText.includes("따듯한") || spacelessText.includes("뜨아") || spacelessText.includes("핫초코")) {
-              if (action.item.type !== 'ICE') {
-                updateOpt("temp", "HOT");
-                newOptions.ice = "없음";
-              }
-            }
-            if (spacelessText.includes("아이스") || spacelessText.includes("차가운") || spacelessText.includes("아아") || spacelessText.includes("아이스초코")) {
-              if (action.item.type !== 'HOT') {
-                updateOpt("temp", "ICE");
-                if (newOptions.ice === "없음" && !spacelessText.includes("얼음없이") && !spacelessText.includes("얼음빼고")) newOptions.ice = "얼음 중간";
-              }
-            }
-
-            if (spacelessText.includes("당도30")) updateOpt("sweetness", "30%");
-            if (spacelessText.includes("당도50") || spacelessText.includes("당도기본")) updateOpt("sweetness", "50% (기본)");
-            if (spacelessText.includes("당도70")) updateOpt("sweetness", "70%");
-            if (spacelessText.includes("당도100")) updateOpt("sweetness", "100%");
-
-            if (spacelessText.includes("펄추가")) updateOpt("pearl", "타피오카 펄 추가");
-            if (spacelessText.includes("화이트펄추가") || spacelessText.includes("알로에펄추가")) updateOpt("pearl", "화이트 펄 추가");
-            if (spacelessText.includes("펄없이") || spacelessText.includes("펄빼고")) updateOpt("pearl", "없음");
-
-            if (spacelessText.includes("샷추가")) updateOpt("shot", "에스프레소 샷 추가 (+500원)");
-            if (spacelessText.includes("샷없이") || spacelessText.includes("샷빼고")) updateOpt("shot", "없음");
-
-            if (isDirectAdd) {
-              action.options = newOptions;
-              action.optionKey = JSON.stringify(newOptions);
-              directAddActions.push(action);
-            } else {
-              newQueue.push({ item: action.item, qty: action.qty, options: newOptions });
-            }
-          }
+        // 2. 카테고리 전환이 아닌 그 외 모든 미매칭 발화는 아주 자연스럽게 AI 추천 탭으로 즉시 전환하여 제미나이 추천 실행!
+        if (activeCategory !== 'ai_recommend') {
+          handleCategoryClick('ai_recommend');
         }
-      });
-
-      if (itemsToRemove.length > 0) {
-        setCart(prevCart => {
-          let newCart = [...prevCart];
-          itemsToRemove.forEach(item => { newCart = newCart.filter(cartItem => cartItem.id !== item.id); });
-          return newCart;
-        });
-      }
-
-      if (directAddActions.length > 0) {
-        setCart(prevCart => {
-          let newCart = [...prevCart];
-          directAddActions.forEach(action => {
-            let price = action.item.price;
-            if (action.options && action.options.shot === "에스프레소 샷 추가 (+500원)") price += 500;
-
-            const existingIdx = newCart.findIndex(i => i.id === action.item.id && i.optionKey === action.optionKey);
-            if (existingIdx !== -1) {
-              newCart[existingIdx] = { ...newCart[existingIdx], count: newCart[existingIdx].count + action.qty, price };
-            } else {
-              newCart.push({ ...action.item, count: action.qty, options: action.options || {}, optionKey: action.optionKey || "{}", price });
-            }
-          });
-          return newCart;
-        });
-      }
-
-      if (newQueue.length > 0) {
-        setOrderQueue(newQueue);
-        openDetailModal(newQueue[0].item, newQueue[0].qty, newQueue[0].options);
+        fetchAiRecommendation(text);
+        return;
       }
     }
   };
@@ -614,15 +734,51 @@ function App() {
 
   const handlePaymentSelection = (method) => {
     setLastProcessingPaymentMethod(method === "CASH" ? "현금" : "카드");
-    setActiveModal('PROCESSING');
+    if (method === "CARD") {
+      const clientKey = "test_ck_GjLJoQ1aVZbWyYDyDdalVw6KYe2R";
+      const tossPayments = window.TossPayments ? window.TossPayments(clientKey) : null;
+      if (tossPayments) {
+        if (totalAmount <= 0) {
+          showToast("결제할 금액이 없습니다.");
+          return;
+        }
+
+        // 결제 전 상태를 localStorage에 백업 (리다이렉트 대비)
+        localStorage.setItem("malmal_kiosk_cart", JSON.stringify(cart));
+        localStorage.setItem("malmal_kiosk_orderType", orderType);
+        localStorage.setItem("malmal_kiosk_totalAmount", totalAmount.toString());
+
+        const orderId = `order_${Date.now()}`;
+        const origin = window.location.origin.startsWith('http') ? window.location.origin : 'http://localhost:5173';
+
+        tossPayments.requestPayment('카드', {
+          amount: Math.round(totalAmount),
+          orderId: orderId,
+          orderName: cart.map(item => item.name).join(', ').substring(0, 80) || '말말카페 음료 결제',
+          successUrl: `${origin}/?payment_success=true`,
+          failUrl: `${origin}/?payment_fail=true`,
+        }).catch((error) => {
+          console.error("토스 결제 에러:", error);
+          showToast(`결제창을 여는데 실패했습니다.\n사유: ${error.message || error.code || '네트워크 혹은 가상 키 인증 오류'}`);
+        });
+      } else {
+        showToast("토스 결제 모듈을 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.");
+      }
+    } else {
+      setActiveModal('PROCESSING');
+    }
   };
 
+  // 현금 결제용 5초 자동 승인 시뮬레이션
   useEffect(() => {
-    if (activeModal === 'PROCESSING') {
-      const timer = setTimeout(() => setActiveModal('RECEIPT'), 5000);
+    if (activeModal === 'PROCESSING' && lastProcessingPaymentMethod === '현금') {
+      const timer = setTimeout(() => {
+        setActiveModal('RECEIPT');
+        speakTTS("결제가 완료되었습니다. 이용해 주셔서 감사합니다.");
+      }, 5000);
       return () => clearTimeout(timer);
     }
-  }, [activeModal]);
+  }, [activeModal, lastProcessingPaymentMethod]);
 
   const closeReceipt = () => {
     setCart([]);
@@ -726,7 +882,10 @@ function App() {
 
   if (isSplashScreen) {
     return (
-      <div className="splash-screen" onClick={() => setIsSplashScreen(false)}>
+      <div className="splash-screen" onClick={() => {
+        setIsSplashScreen(false);
+        speakTTS("말말카페에 오신 것을 환영합니다. 마이크 버튼을 눌러 음성으로 주문해 주세요.");
+      }}>
         <h1 className="splash-title">MALMAL CAFE</h1>
         <p className="splash-subtitle">Premium AI Barista</p>
         <div className="touch-to-start">화면을 터치하여 주문을 시작하세요</div>
