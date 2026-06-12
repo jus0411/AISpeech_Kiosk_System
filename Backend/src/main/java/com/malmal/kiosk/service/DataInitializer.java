@@ -22,11 +22,18 @@ public class DataInitializer implements CommandLineRunner {
         // 필드 이름 변경 후 데이터 정합성을 위해 기존 데이터를 삭제하고 새로 고침 (필요 시)
         menuRepository.deleteAll(); 
 
+        Menu set1 = new Menu("말말 세트 (아메리카노+베이글)", 7000L, "HOT", "/images/malmalmonring.png", "set");
+        set1.setComponentNames("카페 아메리카노,플레인 베이글");
+        
+        Menu set2 = new Menu("말말 디저트 세트 (라떼+치즈케이크)", 11000L, "BOTH", "/images/malmaldesert.png", "set");
+        set2.setComponentNames("카페 라떼,번트 치즈 케이크");
+        
+        Menu set3 = new Menu("말말 시그니처 세트 (아인슈페너+마카롱)", 8500L, "ICE", "/images/malmalsigniture.png", "set");
+        set3.setComponentNames("말말 아인슈페너,블루베리 마카롱");
+
         List<Menu> menus = Arrays.asList(
             // 세트 메뉴 (name, price, type, img, category)
-            new Menu("말말 세트 (아메리카노+베이글)", 7000L, "HOT", "/images/malmalmonring.png", "set"),
-            new Menu("말말 디저트 세트 (라떼+치즈케이크)", 11000L, "BOTH", "/images/malmaldesert.png", "set"),
-            new Menu("말말 시그니처 세트 (아인슈페너+마카롱)", 8500L, "ICE", "/images/malmalsigniture.png", "set"),
+            set1, set2, set3,
 
             // 시그니처
             new Menu("말말 아인슈페너", 6500L, "ICE", "/images/malmaleinspanner.png", "signature"),
@@ -59,6 +66,7 @@ public class DataInitializer implements CommandLineRunner {
             new Menu("클래식 스콘", 3500L, "NONE", "/images/classicscone.png", "dessert"),
             new Menu("블루베리 마카롱", 3000L, "NONE", "/images/blueberrymacaron.png", "dessert"),
             new Menu("두바이 쫀득 쿠키", 5000L, "NONE", "/images/dubai.png", "dessert"),
+            new Menu("플레인 베이글", 3500L, "NONE", "/images/classicscone.png", "dessert"), // 임시 이미지 공유
 
             // 티
             new Menu("자몽 허니 블랙 티", 5700L, "BOTH", "/images/grapefruitblacktea.png", "tea"),

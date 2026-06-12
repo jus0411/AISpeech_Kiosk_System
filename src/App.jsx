@@ -18,6 +18,7 @@ function App() {
   const cartDragRef = useRef({ isDragging: false, startY: 0, startHeight: 40, hasDragged: false, currentHeight: 40 });
 
   const [activeModal, setActiveModal] = useState('MAIN');
+  const [receiptTime, setReceiptTime] = useState('');
   const [activeDetailItem, setActiveDetailItem] = useState(null);
   const [currentOptions, setCurrentOptions] = useState({});
   const [currentModalQty, setCurrentModalQty] = useState(1);
@@ -152,25 +153,45 @@ function App() {
     };
   }, []);
   useEffect(() => {
-    const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8081';
-    fetch(`${API_BASE_URL}/api/menus`)
-      .then(res => res.json())
-      .then(data => {
-        // 백엔드의 평면적인 리스트를 카테고리별 객체로 변환
-        const categorized = data.reduce((acc, item) => {
-          if (!acc[item.category]) acc[item.category] = [];
-          acc[item.category].push(item);
-          return acc;
-        }, {
-          set: [], signature: [], caffeine: [], noncoffee: [], ade: [], dessert: [], tea: []
+    const fetchMenus = () => {
+      const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://malmal-coffee.duckdns.org';
+      fetch(`${API_BASE_URL}/api/menus`)
+        .then(res => res.json())
+        .then(data => {
+          // 세트 메뉴 재고 동적 계산 (구성품 중 가장 적은 재고를 세트 재고로 덮어쓰기)
+          data.forEach(menu => {
+            if (menu.componentNames) {
+              const compNames = menu.componentNames.split(',');
+              const compStocks = compNames.map(cName => {
+                const comp = data.find(m => m.name === cName.trim());
+                return comp ? comp.stock : 0;
+              });
+              if (compStocks.length > 0) {
+                menu.stock = Math.min(...compStocks); // 세트 자체 재고는 무시하고 구성품 재고 중 최소값으로 동기화
+              }
+            }
+          });
+
+          // 백엔드의 평면적인 리스트를 카테고리별 객체로 변환
+          const categorized = data.reduce((acc, item) => {
+            if (!acc[item.category]) acc[item.category] = [];
+            acc[item.category].push(item);
+            return acc;
+          }, {
+            set: [], signature: [], caffeine: [], noncoffee: [], ade: [], dessert: [], tea: []
+          });
+          setMenuData(categorized);
+          setLoading(false);
+        })
+        .catch(err => {
+          console.error("데이터를 가져오는데 실패했습니다:", err);
+          setLoading(false);
         });
-        setMenuData(categorized);
-        setLoading(false);
-      })
-      .catch(err => {
-        console.error("데이터를 가져오는데 실패했습니다:", err);
-        setLoading(false);
-      });
+    };
+
+    fetchMenus();
+    const interval = setInterval(fetchMenus, 3000); // 3초마다 갱신 (실시간 반영)
+    return () => clearInterval(interval);
   }, []);
 
   // 결제 리다이렉션 승인 및 데이터 복원 처리
@@ -202,7 +223,7 @@ function App() {
       setIsSplashScreen(false); // 스플래시 화면 건너뛰기
 
       // 3. 백엔드에 결제 승인 요청 보냄
-      const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8081';
+      const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://malmal-coffee.duckdns.org';
       fetch(`${API_BASE_URL}/api/payments/confirm`, {
         method: 'POST',
         headers: {
@@ -211,7 +232,8 @@ function App() {
         body: JSON.stringify({
           paymentKey: paymentKey,
           orderId: orderId,
-          amount: Number(amount)
+          amount: Number(amount),
+          cartItems: savedCart ? JSON.parse(savedCart) : []
         })
       })
       .then(res => {
@@ -220,6 +242,7 @@ function App() {
       })
       .then(data => {
         // 결제 승인 성공 시 영수증 모달 출력 및 음성 피드백
+        setReceiptTime(new Date().toLocaleString());
         setActiveModal('RECEIPT');
         speakTTS("결제가 완료되었습니다. 이용해 주셔서 감사합니다.");
         
@@ -325,7 +348,7 @@ function App() {
     setAiRecommendations([]);
 
     try {
-      const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8081';
+      const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://malmal-coffee.duckdns.org';
       const response = await fetch(`${API_BASE_URL}/api/ai/recommend`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -364,7 +387,11 @@ function App() {
       setAiRecommendations(recommendedItems.length > 0 ? recommendedItems : allMenus.sort(() => 0.5 - Math.random()).slice(0, 2));
     } catch (error) {
       console.error("AI 추천 통신 오류:", error);
-      setAiMessage("AI 추천 서버와 연결할 수 없습니다. 잠시 후 다시 시도해주세요.");
+      const fallbackMsg = "현재 AI 서버 접속량이 많아, 인기 메뉴를 무작위로 추천해 드릴게요!";
+      setAiMessage(fallbackMsg);
+      speakTTS(fallbackMsg);
+      const allMenus = [...menuData.set, ...menuData.signature, ...menuData.caffeine, ...menuData.noncoffee, ...menuData.ade, ...menuData.dessert, ...menuData.tea];
+      setAiRecommendations(allMenus.sort(() => 0.5 - Math.random()).slice(0, 2));
     } finally {
       setIsAiThinking(false);
     }
@@ -447,6 +474,63 @@ function App() {
 
       if (isClearAll) { setCart([]); return; }
 
+      // ⭐️ [신규 로직] AI 추천 화면에서 "추천해준거 다 담아줘" 등 상황 처리
+      if (activeCategory === 'ai_recommend' && aiRecommendations.length > 0) {
+        const isCartAddIntent = spacelessText.match(/담아|주문|추가|줘|시킬|담을/);
+        const isTargetingRecommendations = spacelessText.match(/이거|그거|전부|다|하나씩|추천한|추천해준/);
+        const isAskingNewRecommendation = spacelessText.match(/어때|알려|뭐가|다른|다시/);
+        
+        if (isCartAddIntent && isTargetingRecommendations && !isAskingNewRecommendation) {
+           let hasOutOfStock = false;
+           const availableItems = aiRecommendations.filter(item => {
+             if (item.stock <= 0) {
+               hasOutOfStock = true;
+               return false;
+             }
+             return true;
+           });
+
+           if (availableItems.length === 0) {
+             setAiMessage("추천해 드린 메뉴가 모두 품절되었습니다.");
+             speakTTS("죄송합니다. 추천해 드린 메뉴가 모두 품절되었습니다.");
+             return;
+           }
+
+           setCart(prevCart => {
+             let newCart = [...prevCart];
+             availableItems.forEach(item => {
+                let defaultOpts = { shot: "없음" };
+                if (item.type !== 'NONE') {
+                  defaultOpts = {
+                    temp: item.type === 'HOT' || item.type === 'BOTH' ? 'HOT' : 'ICE',
+                    ice: item.type !== 'HOT' ? '얼음 중간' : '없음',
+                    sweetness: '50% (기본)',
+                    pearl: '없음',
+                    shot: "없음"
+                  };
+                }
+                const optionKey = item.type !== 'NONE' ? JSON.stringify(defaultOpts) : "{}";
+                const existingIdx = newCart.findIndex(i => i.id === item.id && i.optionKey === optionKey);
+                if (existingIdx !== -1) {
+                  newCart[existingIdx] = { ...newCart[existingIdx], count: newCart[existingIdx].count + 1 };
+                } else {
+                  newCart.push({ ...item, count: 1, options: item.type !== 'NONE' ? defaultOpts : {}, optionKey: optionKey, price: item.price });
+                }
+             });
+             return newCart;
+           });
+           
+           if (hasOutOfStock) {
+             setAiMessage("일부 메뉴가 품절되어, 주문 가능한 메뉴만 장바구니에 담았습니다.");
+             speakTTS("일부 메뉴가 품절되어 주문 가능한 메뉴만 장바구니에 담았습니다. 결제하시려면 결제해 줘 라고 말씀해주세요.");
+           } else {
+             setAiMessage("말말이의 추천 메뉴를 장바구니에 쏙 담았습니다!");
+             speakTTS("추천해 드린 메뉴를 모두 장바구니에 담았습니다. 결제하시려면 아래 결제하기 버튼을 누르시거나 결제해 줘 라고 말씀해주세요.");
+           }
+           return;
+        }
+      }
+
       let foundItems = [];
       allMenus.forEach(item => {
         const itemAliases = menuAliasesByName[item.name] || [];
@@ -460,7 +544,7 @@ function App() {
       });
 
       // 사용자의 명시적인 추천/대화 의도 및 주문 의도 키워드 감지
-      const isRecommendationIntent = spacelessText.includes("추천") || 
+      let isRecommendationIntent = spacelessText.includes("추천") || 
                                      spacelessText.includes("우울") || 
                                      spacelessText.includes("기분") || 
                                      spacelessText.includes("도와") || 
@@ -469,6 +553,12 @@ function App() {
                                      spacelessText.includes("알려줘") || 
                                      spacelessText.includes("소개") || 
                                      (spacelessText.includes("뭐가") && spacelessText.includes("맛있"));
+
+      // "추천한거 담아줘" 처럼 장바구니 추가 의도가 명확한 경우, AI 추천으로 넘어가지 않도록 예외 처리
+      const isCartOrderCommand = spacelessText.match(/담아|주문|추가|줘|시킬|담을/);
+      if (isRecommendationIntent && isCartOrderCommand && (spacelessText.includes("추천한") || spacelessText.includes("추천해준"))) {
+        isRecommendationIntent = false;
+      }
 
       // 만약 메뉴 매칭이 되었고, 명시적인 추천 의도가 아니라면 바로 주문 모달 노출/장바구니 추가 처리 진행
       if (foundItems.length > 0 && !isRecommendationIntent) {
@@ -511,6 +601,19 @@ function App() {
           const digitMatch = chunk.match(/\d+/);
           if (digitMatch) qty = parseInt(digitMatch[0], 10);
           else for (let nw of numWords) if (chunk.includes(nw.word)) { qty = nw.num; break; }
+
+          if (itemAction === 'ADD') {
+            if (found.item.stock <= 0) {
+              showToast(`'${found.item.name}' 메뉴는 품절되어 담을 수 없습니다.`);
+              speakTTS(`${found.item.name} 메뉴는 품절되어 주문하실 수 없습니다.`);
+              return; // skip pushing to actions
+            }
+            if (found.item.stock < qty) {
+              showToast(`'${found.item.name}' 메뉴의 재고가 부족하여 남은 수량(${found.item.stock}개)만큼만 담습니다.`);
+              speakTTS(`${found.item.name} 메뉴의 재고가 부족하여 남은 수량인 ${found.item.stock}개까지만 담겠습니다.`);
+              qty = found.item.stock; // Limit qty to available stock
+            }
+          }
 
           actions.push({ type: itemAction, item: found.item, qty });
         });
@@ -728,6 +831,36 @@ function App() {
 
   const startPaymentFlow = () => {
     if (cart.length === 0) return showToast("담긴 메뉴가 없습니다.");
+
+    // 장바구니에 담긴 메뉴들의 총 수량을 ID별로 합산
+    const aggregatedCounts = {};
+    for (const item of cart) {
+      if (!aggregatedCounts[item.id]) {
+        aggregatedCounts[item.id] = { name: item.name, count: 0 };
+      }
+      aggregatedCounts[item.id].count += item.count;
+    }
+
+    // 합산된 수량과 현재 최신 재고(menuData)를 비교하여 검증
+    for (const menuId in aggregatedCounts) {
+      const aggItem = aggregatedCounts[menuId];
+      let menuInfo = null;
+      for (const category in menuData) {
+        const found = menuData[category].find(m => m.id === parseInt(menuId, 10));
+        if (found) {
+          menuInfo = found;
+          break;
+        }
+      }
+
+      if (menuInfo) {
+        if (aggItem.count > menuInfo.stock) {
+          showToast(`'${aggItem.name}' 메뉴의 재고가 부족합니다.\n현재 남은 수량: ${menuInfo.stock}개`);
+          return; // 재고가 부족하면 결제 모달로 넘어가지 않음
+        }
+      }
+    }
+
     setOrderType('매장');
     setActiveModal('PAYMENT');
   };
@@ -773,12 +906,26 @@ function App() {
   useEffect(() => {
     if (activeModal === 'PROCESSING' && lastProcessingPaymentMethod === '현금') {
       const timer = setTimeout(() => {
-        setActiveModal('RECEIPT');
-        speakTTS("결제가 완료되었습니다. 이용해 주셔서 감사합니다.");
+        // 현금 결제 성공 처리: 백엔드에 장바구니 데이터를 보내서 재고 차감 요청
+        const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://malmal-coffee.duckdns.org';
+        fetch(`${API_BASE_URL}/api/payments/cash`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ cartItems: cart })
+        }).then(() => {
+          setReceiptTime(new Date().toLocaleString());
+          setActiveModal('RECEIPT');
+          speakTTS("결제가 완료되었습니다. 이용해 주셔서 감사합니다.");
+        }).catch(err => {
+          console.error("현금 결제 재고 차감 실패", err);
+          setReceiptTime(new Date().toLocaleString());
+          setActiveModal('RECEIPT');
+          speakTTS("결제가 완료되었습니다. 이용해 주셔서 감사합니다.");
+        });
       }, 5000);
       return () => clearTimeout(timer);
     }
-  }, [activeModal, lastProcessingPaymentMethod]);
+  }, [activeModal, lastProcessingPaymentMethod, cart]);
 
   const closeReceipt = () => {
     setCart([]);
@@ -945,7 +1092,8 @@ function App() {
                   <h3 style={{ marginTop: '0', color: 'var(--mm-dark)' }}>추천 메뉴</h3>
                   <div className="menu-grid">
                     {aiRecommendations.map((item) => (
-                      <div key={item.id} className="menu-card" onClick={() => handleMenuClick(item)} style={{ borderColor: '#673AB7' }}>
+                      <div key={item.id} className="menu-card" onClick={() => item.stock > 0 ? handleMenuClick(item) : showToast("해당 메뉴는 품절되었습니다.")} style={{ borderColor: '#673AB7', opacity: item.stock <= 0 ? 0.5 : 1, position: 'relative' }}>
+                        {item.stock <= 0 && <div style={{position:'absolute', top:'10px', right:'10px', background:'#D32F2F', color:'white', padding:'5px 10px', borderRadius:'20px', fontWeight:'bold', fontSize:'0.9rem', zIndex:10, boxShadow:'0 2px 5px rgba(0,0,0,0.2)'}}>Sold Out</div>}
                         {item.img ? (
                           <img src={item.img} alt={item.name} style={{ width: '100%', height: '120px', objectFit: 'cover', borderRadius: '10px', marginBottom: '15px' }} />
                         ) : (
@@ -966,7 +1114,8 @@ function App() {
               </h2>
               <div className="menu-grid">
                 {menuData[activeCategory].map((item) => (
-                  <div key={item.id} className="menu-card" onClick={() => handleMenuClick(item)}>
+                  <div key={item.id} className="menu-card" onClick={() => item.stock > 0 ? handleMenuClick(item) : showToast("해당 메뉴는 품절되었습니다.")} style={{ opacity: item.stock <= 0 ? 0.5 : 1, position: 'relative' }}>
+                    {item.stock <= 0 && <div style={{position:'absolute', top:'10px', right:'10px', background:'#D32F2F', color:'white', padding:'5px 10px', borderRadius:'20px', fontWeight:'bold', fontSize:'0.9rem', zIndex:10, boxShadow:'0 2px 5px rgba(0,0,0,0.2)'}}>Sold Out</div>}
                     {item.img ? (
                       <img src={item.img} alt={item.name} style={{ width: '100%', height: '120px', objectFit: 'cover', borderRadius: '10px', marginBottom: '15px' }} />
                     ) : (
@@ -1131,8 +1280,9 @@ function App() {
           <div className="receipt">
             <h2>RECEIPT</h2>
             <p style={{ textAlign: 'center', fontWeight: 'bold', color: 'var(--mm-primary)', fontSize: '1.2rem', margin: '5px 0' }}>[{orderType}]</p>
+            <div style={{ margin: '15px 0', borderBottom: '2px dashed #ccc' }}></div>
             <p style={{ color: '#666', fontSize: '0.9rem', marginTop: '15px' }}>매장명: 말말카페 (MalMal Cafe)</p>
-            <p style={{ color: '#666', fontSize: '0.9rem' }}>일시: {new Date().toLocaleString()}</p>
+            <p style={{ color: '#666', fontSize: '0.9rem' }}>일시: {receiptTime}</p>
             <div className="receipt-list">
               {cartWithUniqueKey.map((item) => (
                 <div key={item.uniqueKey} style={{ fontSize: '0.85rem', margin: '8px 0', borderBottom: '1px solid #eee', paddingBottom: '8px' }}>

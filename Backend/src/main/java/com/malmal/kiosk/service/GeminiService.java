@@ -70,22 +70,35 @@ public class GeminiService {
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<Map<String, Object>> entity = new HttpEntity<>(request, headers);
 
-        // 4. 제미나이 API 호출 및 결과 파싱
-        try {
-            ResponseEntity<Map> response = restTemplate.postForEntity(GEMINI_API_URL + apiKey, entity, Map.class);
-            Map<String, Object> body = response.getBody();
-            if (body != null && body.containsKey("candidates")) {
-                List<Map<String, Object>> candidates = (List<Map<String, Object>>) body.get("candidates");
-                if (!candidates.isEmpty()) {
-                    Map<String, Object> content = (Map<String, Object>) candidates.get(0).get("content");
-                    List<Map<String, Object>> resParts = (List<Map<String, Object>>) content.get("parts");
-                    return (String) resParts.get(0).get("text");
+        // 4. 제미나이 API 호출 및 결과 파싱 (재시도 로직 추가)
+        int maxRetries = 3;
+        for (int attempt = 1; attempt <= maxRetries; attempt++) {
+            try {
+                ResponseEntity<Map> response = restTemplate.postForEntity(GEMINI_API_URL + apiKey, entity, Map.class);
+                Map<String, Object> body = response.getBody();
+                if (body != null && body.containsKey("candidates")) {
+                    List<Map<String, Object>> candidates = (List<Map<String, Object>>) body.get("candidates");
+                    if (!candidates.isEmpty()) {
+                        Map<String, Object> content = (Map<String, Object>) candidates.get(0).get("content");
+                        List<Map<String, Object>> resParts = (List<Map<String, Object>>) content.get("parts");
+                        return (String) resParts.get(0).get("text");
+                    }
+                }
+                return "죄송합니다, 현재 추천을 해드릴 수 없습니다.";
+            } catch (Exception e) {
+                System.err.println("Gemini API 호출 실패 (시도 " + attempt + "/" + maxRetries + "): " + e.getMessage());
+                if (attempt == maxRetries) {
+                    e.printStackTrace();
+                    return "현재 AI 서버 접속량이 많아, 인기 메뉴를 무작위로 추천해 드릴게요!";
+                }
+                try {
+                    Thread.sleep(1500); // 1.5초 대기 후 재시도
+                } catch (InterruptedException ie) {
+                    Thread.currentThread().interrupt();
+                    return "AI 추천 서버와 연결할 수 없습니다.";
                 }
             }
-            return "죄송합니다, 현재 추천을 해드릴 수 없습니다.";
-        } catch (Exception e) {
-            e.printStackTrace();
-            return "AI 추천 서버와 연결할 수 없습니다.";
         }
+        return "현재 AI 서버 접속량이 많아, 인기 메뉴를 무작위로 추천해 드릴게요!";
     }
 }

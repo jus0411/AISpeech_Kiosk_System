@@ -1,28 +1,28 @@
-/* 프리미엄 카페 키오스크 메인 스타일 (버건디/베이지 테마 & 글래스모피즘) */
+/* ?꾨━誘몄뾼 移댄럹 ?ㅼ삤?ㅽ겕 硫붿씤 ?ㅽ???(踰꾧굔??踰좎씠吏 ?뚮쭏 & 湲?섏뒪紐⑦뵾利? */
 
 :root {
-  /* ⭐️ 고급스러운 말말카페 테마: 버건디 & 베이지 (유지) */
-  --mm-primary: #800020;    /* 버건디 (메인 컬러) */
-  --mm-primary-hover: #a30029; /* 호버시 살짝 밝은 버건디 */
-  --mm-dark: #4A0404;       /* 딥 버건디 (사이드바, 텍스트) */
-  --mm-light: #F5F5DC;      /* 따뜻한 베이지 (배경 기본값) */
-  --mm-light-glass: rgba(245, 245, 220, 0.75); /* 베이지 글래스 */
-  --mm-white-glass: rgba(255, 255, 255, 0.65); /* 화이트 글래스 */
-  --mm-dark-glass: rgba(74, 4, 4, 0.85); /* 다크 버건디 글래스 */
-  --mm-accent: #D4AF37;     /* 은은한 골드 (포인트) */
-  --mm-text: #2c1a1a;       /* 텍스트 딥 컬러 */
-  --mm-text-muted: #6b5a5a; /* 연한 텍스트 */
+  /* 狩먲툘 怨좉툒?ㅻ윭??留먮쭚移댄럹 ?뚮쭏: 踰꾧굔??& 踰좎씠吏 (?좎?) */
+  --mm-primary: #800020;    /* 踰꾧굔??(硫붿씤 而щ윭) */
+  --mm-primary-hover: #a30029; /* ?몃쾭???댁쭩 諛앹? 踰꾧굔??*/
+  --mm-dark: #4A0404;       /* ??踰꾧굔??(?ъ씠?쒕컮, ?띿뒪?? */
+  --mm-light: #F5F5DC;      /* ?곕쑜??踰좎씠吏 (諛곌꼍 湲곕낯媛? */
+  --mm-light-glass: rgba(245, 245, 220, 0.75); /* 踰좎씠吏 湲?섏뒪 */
+  --mm-white-glass: rgba(255, 255, 255, 0.65); /* ?붿씠??湲?섏뒪 */
+  --mm-dark-glass: rgba(74, 4, 4, 0.85); /* ?ㅽ겕 踰꾧굔??湲?섏뒪 */
+  --mm-accent: #D4AF37;     /* ????怨⑤뱶 (?ъ씤?? */
+  --mm-text: #2c1a1a;       /* ?띿뒪????而щ윭 */
+  --mm-text-muted: #6b5a5a; /* ?고븳 ?띿뒪??*/
 
-  /* 트랜지션 및 섀도우는 index.css의 변수 활용 */
+  /* ?몃옖吏??諛???꾩슦??index.css??蹂???쒖슜 */
 }
 
-/* 스크롤바 커스텀 (프리미엄 룩) */
+/* ?ㅽ겕濡ㅻ컮 而ㅼ뒪? (?꾨━誘몄뾼 猷? */
 ::-webkit-scrollbar { width: 8px; height: 8px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: rgba(128, 0, 32, 0.2); border-radius: 10px; }
 ::-webkit-scrollbar-thumb:hover { background: rgba(128, 0, 32, 0.4); }
 
-/* 2. 전체 레이아웃 (배경에 은은한 매쉬 그라데이션) */
+/* 2. ?꾩껜 ?덉씠?꾩썐 (諛곌꼍??????留ㅼ돩 洹몃씪?곗씠?? */
 .app-container { 
   display: flex; 
   height: 100vh;
@@ -30,13 +30,13 @@
   width: 100vw; 
   overflow: hidden; 
   background: var(--mm-light);
-  /* 우아한 백그라운드 그라데이션 효과 */
+  /* ?곗븘??諛깃렇?쇱슫??洹몃씪?곗씠???④낵 */
   background-image: 
     radial-gradient(circle at 15% 50%, rgba(128, 0, 32, 0.03), transparent 25%),
     radial-gradient(circle at 85% 30%, rgba(212, 175, 55, 0.05), transparent 25%);
 }
 
-/* 사이드바 (좌측 메뉴) */
+/* ?ъ씠?쒕컮 (醫뚯륫 硫붾돱) */
 .sidebar { 
   flex: 0 0 13%; 
   background: var(--mm-dark-glass);
@@ -65,7 +65,7 @@
 .logo-area span { display: inline-block; animation: floatIcon 3s ease-in-out infinite; }
 @keyframes floatIcon { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
 
-/* 메인 컨테이너 */
+/* 硫붿씤 而⑦뀒?대꼫 */
 .main-container { 
   flex: 1; 
   display: flex; 
@@ -74,7 +74,7 @@
   position: relative;
 }
 
-/* 상단 카테고리 바 */
+/* ?곷떒 移댄뀒怨좊━ 諛?*/
 .category-bar { 
   display: flex; 
   background: var(--mm-white-glass); 
@@ -122,7 +122,7 @@
   transform: translateY(-2px);
 }
 
-/* 스크롤 메뉴 영역 */
+/* ?ㅽ겕濡?硫붾돱 ?곸뿭 */
 .menu-area { 
   flex: 1; 
   overflow-y: auto; 
@@ -159,13 +159,13 @@
   position: relative;
   overflow: hidden;
 }
-/* 카드 호버 시 애니메이션 */
+/* 移대뱶 ?몃쾭 ???좊땲硫붿씠??*/
 .menu-card:hover { 
   transform: translateY(-8px); 
   box-shadow: var(--shadow-lg); 
   border-color: rgba(128, 0, 32, 0.3); 
 }
-/* 내부 빛반사 효과 */
+/* ?대? 鍮쏅컲???④낵 */
 .menu-card::before {
   content: ''; position: absolute; top: 0; left: -100%; width: 50%; height: 100%;
   background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.4) 50%, rgba(255,255,255,0) 100%);
@@ -196,7 +196,7 @@
   color: var(--mm-primary); font-weight: 900; font-size: 1.3rem; font-family: var(--font-numeric);
 }
 
-/* 메인 하단 (결제 바) */
+/* 硫붿씤 ?섎떒 (寃곗젣 諛? */
 .main-bottom-area { 
   padding: 25px 40px; 
   background: var(--mm-white-glass); 
@@ -223,7 +223,7 @@
   box-shadow: 0 12px 25px rgba(128, 0, 32, 0.4); 
 }
 
-/* 주문 컨테이너 (우측 장바구니) - 글래스모피즘 */
+/* 二쇰Ц 而⑦뀒?대꼫 (?곗륫 ?λ컮援щ땲) - 湲?섏뒪紐⑦뵾利?*/
 .order-container { 
   flex: 0 0 30%; min-width: 320px; max-width: 400px;
   background: var(--mm-light-glass); 
@@ -239,7 +239,7 @@
 }
 .cart-title { font-size: 1.5rem; font-weight: 900; color: var(--mm-dark); margin: 0; }
 
-/* ⭐️ 마이크 버튼 (공통) - 고급스러운 골드 포인트 애니메이션 */
+/* 狩먲툘 留덉씠??踰꾪듉 (怨듯넻) - 怨좉툒?ㅻ윭??怨⑤뱶 ?ъ씤???좊땲硫붿씠??*/
 .mic-btn { 
   background: linear-gradient(135deg, var(--mm-accent), #B8860B); 
   color: white; border: none; border-radius: 50%; width: 60px; height: 60px; 
@@ -260,7 +260,7 @@
   100% { box-shadow: 0 0 0 0 rgba(244, 67, 54, 0); transform: scale(1.05); } 
 }
 
-/* 장바구니 리스트 */
+/* ?λ컮援щ땲 由ъ뒪??*/
 .cart-list { flex: 1; overflow-y: auto; padding: 20px; padding-bottom: 40px;}
 .cart-item { 
   background: rgba(255,255,255,0.8); 
@@ -284,7 +284,7 @@
 .delete-btn { background: none; border: none; color: #ff5252; font-size: 1.4rem; cursor: pointer; padding: 5px; transition: 0.2s; }
 .delete-btn:hover { transform: scale(1.2) rotate(90deg); }
 
-/* 모달 & 글래스모피즘 */
+/* 紐⑤떖 & 湲?섏뒪紐⑦뵾利?*/
 .modal { 
   position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; 
   background: rgba(0,0,0,0.5); 
@@ -310,7 +310,7 @@
 
 .modal-content h2 { text-align: center; color: var(--mm-dark); margin-top: 0; font-weight: 900; letter-spacing: -0.5px; font-size: 2rem; }
 
-/* 옵션 그룹 */
+/* ?듭뀡 洹몃９ */
 .option-group { margin-bottom: 25px; }
 .option-title { font-weight: 900; font-size: 1.15rem; color: var(--mm-text); margin-bottom: 15px; display: block; border-left: 5px solid var(--mm-primary); padding-left: 12px; }
 .option-items { display: flex; gap: 12px; flex-wrap: wrap; }
@@ -321,13 +321,13 @@
 .option-item:hover { border-color: rgba(128, 0, 32, 0.3); transform: translateY(-2px); }
 .option-item.active { background: var(--mm-primary); color: white; border-color: var(--mm-primary); box-shadow: 0 4px 12px rgba(128, 0, 32, 0.25); }
 
-/* 영수증 */
+/* ?곸닔利?*/
 .receipt { 
   background: white; padding: 40px 30px; width: 380px; border-radius: 20px; 
   box-shadow: 0 20px 40px rgba(0,0,0,0.25); 
   position: relative;
 }
-.receipt::before { /* 영수증 상단 지그재그 효과 제거, 모던하게 */
+.receipt::before { /* ?곸닔利??곷떒 吏洹몄옱洹??④낵 ?쒓굅, 紐⑤뜕?섍쾶 */
   content: ''; position: absolute; top: 0; left: 0; right: 0; height: 15px; background: var(--mm-primary); border-radius: 20px 20px 0 0;
 }
 .receipt h2 { text-align: center; color: var(--mm-dark); margin-top: 5px; font-weight: 900; letter-spacing: 2px; font-size: 1.8rem;}
@@ -338,7 +338,7 @@
 }
 .close-btn:hover { background: #e0e0e0; transform: translateY(-2px); }
 
-/* 1. 대기 화면 (프리미엄 스플래시 스크린) */
+/* 1. ?湲??붾㈃ (?꾨━誘몄뾼 ?ㅽ뵆?섏떆 ?ㅽ겕由? */
 .splash-screen {
   position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
   background: radial-gradient(circle at center, var(--mm-dark), #2a0202);
@@ -371,14 +371,14 @@
   100% { box-shadow: 0 0 0 0 rgba(255,255,255,0); } 
 }
 
-/* 보이스 디버그 창 */
+/* 蹂댁씠???붾쾭洹?李?*/
 .voice-debug-area { 
   border-top: 1px solid rgba(255,255,255,0.1); margin-top: auto; padding-top: 20px; 
   color: var(--mm-accent); font-size: 0.9rem; line-height: 1.5; text-align: center;
   font-weight: 600;
 }
 
-/* ⭐️ 사이드바 하단 (추가된 버튼 포함) */
+/* 狩먲툘 ?ъ씠?쒕컮 ?섎떒 (異붽???踰꾪듉 ?ы븿) */
 .sidebar-bottom-area {
   margin-top: auto; width: 100%; display: flex; flex-direction: column; gap: 15px;
 }
@@ -389,10 +389,10 @@
 }
 .a11y-sidebar-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 15px rgba(0,0,0,0.3); }
 
-/* 모바일 결제 영역 데스크탑 숨김 */
+/* 紐⑤컮??寃곗젣 ?곸뿭 ?곗뒪?ы깙 ?④? */
 .mobile-pay-area { display: none; }
 
-/* 📱 태블릿/모바일 반응형 (화면 너비 1024px 이하일 때) */
+/* ?벑 ?쒕툝由?紐⑤컮??諛섏쓳??(?붾㈃ ?덈퉬 1024px ?댄븯???? */
 @media (max-width: 1024px) {
   .app-container { flex-direction: column; }
   .sidebar { flex: none; width: 100%; height: auto; flex-direction: row; align-items: center; justify-content: space-between; padding: 10px 20px; border-bottom: 1px solid rgba(255,255,255,0.1); border-right: none;}
@@ -444,14 +444,14 @@
 }
 
 /* =========================================================================
-   ⭐️ [추가한 부분] 장바구니 제스처 (스와이프 삭제) 스타일
+   狩먲툘 [異붽???遺遺? ?λ컮援щ땲 ?쒖뒪泥?(?ㅼ??댄봽 ??젣) ?ㅽ???
    ========================================================================= */
 .cart-item-wrapper {
   position: relative;
   margin-bottom: 15px;
   border-radius: 16px;
   overflow: hidden;
-  background: white; /* cart item이 스와이프 되었을 때 보이도록 세팅 */
+  background: white; /* cart item???ㅼ??댄봽 ?섏뿀????蹂댁씠?꾨줉 ?명똿 */
 }
 .swipe-delete-bg {
   position: absolute;
@@ -473,12 +473,12 @@
 }
 
 /* =========================================================================
-   ⭐️ [추가한 부분] 고령자 및 접근성(돋보기) 모드 오버라이딩 스타일
+   狩먲툘 [異붽???遺遺? 怨좊졊??諛??묎렐???뗫낫湲? 紐⑤뱶 ?ㅻ쾭?쇱씠???ㅽ???
    ========================================================================= */
 .app-container.a11y-mode * {
   letter-spacing: -0.5px;
 }
-/* 메인 메뉴 카드 확대 및 굵게 처리 */
+/* 硫붿씤 硫붾돱 移대뱶 ?뺣? 諛?援듦쾶 泥섎━ */
 .app-container.a11y-mode .menu-name { font-size: 1.8rem; font-weight: 900; color: #000; }
 .app-container.a11y-mode .menu-price { font-size: 1.8rem; color: #D32F2F; font-weight: 900;}
 .app-container.a11y-mode .category-title { font-size: 2.5rem; color: #000; font-weight: 900; }
@@ -491,7 +491,7 @@
 .app-container.a11y-mode .menu-card img { height: 180px; }
 .app-container.a11y-mode .menu-grid { grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
 
-/* 장바구니 및 결제 버튼 엄청 크게 확대 */
+/* ?λ컮援щ땲 諛?寃곗젣 踰꾪듉 ?꾩껌 ?ш쾶 ?뺣? */
 .app-container.a11y-mode .cart-item-name { font-size: 1.6rem; color: #000; font-weight: 900; }
 .app-container.a11y-mode .cart-item-price { font-size: 1.6rem; color: #D32F2F; }
 .app-container.a11y-mode .cart-controls span { font-size: 1.6rem; width: 35px; }
@@ -506,7 +506,7 @@
 }
 
 /* =========================================================================
-   ⭐️ [추가한 부분] 이전 단계에서 작업한 AI Voice Visualizer 
+   狩먲툘 [異붽???遺遺? ?댁쟾 ?④퀎?먯꽌 ?묒뾽??AI Voice Visualizer 
    ========================================================================= */
 .voice-visualizer-overlay {
   position: fixed;
@@ -541,7 +541,7 @@
   height: 40px;
 }
 
-/* 빛나는 둥근 오브제 (Siri / AI Orb 느낌) */
+/* 鍮쏅굹???κ렐 ?ㅻ툕??(Siri / AI Orb ?먮굦) */
 .orb {
   width: 25px;
   height: 25px;
@@ -557,7 +557,202 @@
   100% { transform: scale(1.3); box-shadow: 0 0 25px rgba(212, 175, 55, 1); }
 }
 
-/* 음파를 나타내는 막대 (Wave Bars) */
+/* ?뚰뙆瑜??섑??대뒗 留됰? (Wave Bars) */
+.wave-bar {
+  width: 6px;
+  height: 10px;
+  background: var(--mm-primary);
+  border-radius: 10px;
+  animation: wavePulse 1s infinite alternate ease-in-out;
+}
+
+.wave-bar:nth-child(2) { animation-delay: 0.1s; height: 15px; }
+.wave-bar:nth-child(3) { animation-delay: 0.3s; height: 25px; }
+.wave-bar:nth-child(4) { animation-delay: 0.5s; height: 35px; }
+.wave-bar:nth-child(5) { animation-delay: 0.2s; height: 18px; }
+.wave-bar:nth-child(6) { animation-delay: 0.4s; height: 12px; }
+
+@keyframes wavePulse {
+  0% { transform: scaleY(0.5); opacity: 0.5; }
+  100% { transform: scaleY(1.5); opacity: 1; }
+  margin-top: auto; width: 100%; display: flex; flex-direction: column; gap: 15px;
+}
+.a11y-sidebar-btn {
+  width: 100%; padding: 15px; border-radius: 12px; border: none;
+  font-weight: 900; font-size: 1.1rem; cursor: pointer; transition: 0.2s;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+}
+.a11y-sidebar-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 15px rgba(0,0,0,0.3); }
+
+/* 紐⑤컮??寃곗젣 ?곸뿭 ?곗뒪?ы깙 ?④? */
+.mobile-pay-area { display: none; }
+
+/* ?벑 ?쒕툝由?紐⑤컮??諛섏쓳??(?붾㈃ ?덈퉬 1024px ?댄븯???? */
+@media (max-width: 1024px) {
+  .app-container { flex-direction: column; }
+  .sidebar { flex: none; width: 100%; height: auto; flex-direction: row; align-items: center; justify-content: space-between; padding: 10px 20px; border-bottom: 1px solid rgba(255,255,255,0.1); border-right: none;}
+  .logo-area { height: auto; border: none; margin: 0; justify-content: flex-start; flex-direction: row; gap: 10px;}
+  
+  .sidebar-bottom-area { margin-top: 0; width: auto; flex-direction: row; align-items: center; gap: 10px; }
+  .a11y-sidebar-btn { padding: 10px 15px; font-size: 1rem; width: auto; white-space: nowrap; }
+  
+  .main-container { padding-bottom: 75px; }
+  .main-bottom-area { display: none; }
+  .pay-btn { padding: 24px 60px; font-size: 1.6rem; border-radius: 20px; }
+
+  .order-container { position: fixed; bottom: 0; left: 0; width: 100%; max-width: none; flex: none; height: var(--cart-height, 40vh); transform: translateY(calc(100% - 75px)); border-left: none; border-top: 1px solid rgba(255,255,255,0.5); border-radius: 30px 30px 0 0; z-index: 100; box-shadow: 0 -10px 30px rgba(0,0,0,0.2); display: flex; flex-direction: column; transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1), height 0.35s cubic-bezier(0.2, 0.8, 0.2, 1); }
+  .order-container.open { transform: translateY(0); }
+  .order-container.dragging { transition: none !important; }
+  .cart-header { border-radius: 30px 30px 0 0; padding: 15px 25px; height: 75px; display: flex; align-items: center; cursor: grab; user-select: none; }
+  .cart-title { font-size: 1.2rem; margin: 0; flex: 1; }
+  .mic-btn { width: 60px; height: 60px; font-size: 1.6rem; }
+  
+  .cart-list { flex: 1; margin-bottom: 0; padding-bottom: 20px; overflow-y: auto; }
+  .mobile-pay-area { display: flex; align-items: center; justify-content: space-between; padding: 15px 20px 25px 20px; background: white; border-top: 1px solid rgba(0,0,0,0.1); padding-bottom: calc(25px + env(safe-area-inset-bottom)); }
+
+  .touch-to-start { font-size: 1.5rem; padding: 20px 40px; }
+  .splash-title { font-size: 3.5rem; }
+  .category-bar { padding: 15px; overflow-x: auto; flex-wrap: nowrap; gap: 10px; }
+  .category-item { white-space: nowrap; font-size: 1.25rem; padding: 12px 22px; }
+  
+  .menu-grid { grid-template-columns: repeat(3, 1fr); padding: 15px; gap: 10px; }
+  .menu-card { padding: 10px; border-radius: 12px; }
+  .menu-img-placeholder, .menu-card img { height: 85px; border-radius: 8px; margin-bottom: 10px; }
+  .menu-name { font-size: 1.25rem; margin-bottom: 4px; }
+  .menu-price { font-size: 1.25rem; }
+
+  .drag-handle-pill {
+    display: block;
+    width: 40px;
+    height: 5px;
+    background: rgba(0,0,0,0.2);
+    border-radius: 10px;
+    position: absolute;
+    top: 6px;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+}
+
+.drag-handle-pill {
+  display: none;
+}
+
+/* =========================================================================
+   狩먲툘 [異붽???遺€遺? ?λ컮援щ땲 ?쒖뒪泥?(?ㅼ??댄봽 ??젣) ?ㅽ???
+   ========================================================================= */
+.cart-item-wrapper {
+  position: relative;
+  margin-bottom: 15px;
+  border-radius: 16px;
+  overflow: hidden;
+  background: white; /* cart item???ㅼ??댄봽 ?섏뿀????蹂댁씠?꾨줉 ?명똿 */
+}
+.swipe-delete-bg {
+  position: absolute;
+  top: 0; right: 0;
+  width: 100px;
+  height: 100%;
+  background: #ff5252;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 900;
+  font-size: 1.2rem;
+  z-index: 1;
+}
+.cart-item {
+  position: relative;
+  z-index: 2;
+}
+
+/* =========================================================================
+   狩먲툘 [異붽???遺€遺? 怨좊졊??諛??묎렐???뗫낫湲? 紐⑤뱶 ?ㅻ쾭?쇱씠???ㅽ???
+   ========================================================================= */
+.app-container.a11y-mode * {
+  letter-spacing: -0.5px;
+}
+/* 硫붿씤 硫붾돱 移대뱶 ?뺣? 諛?援듦쾶 泥섎━ */
+.app-container.a11y-mode .menu-name { font-size: 1.8rem; font-weight: 900; color: #000; }
+.app-container.a11y-mode .menu-price { font-size: 1.8rem; color: #D32F2F; font-weight: 900;}
+.app-container.a11y-mode .category-title { font-size: 2.5rem; color: #000; font-weight: 900; }
+.app-container.a11y-mode .category-item { font-size: 1.4rem; padding: 18px 30px; font-weight: 900; }
+.app-container.a11y-mode .menu-card { 
+  background: rgba(255,255,255,0.95); 
+  border: 4px solid #555; 
+  padding: 15px; 
+}
+.app-container.a11y-mode .menu-card img { height: 180px; }
+.app-container.a11y-mode .menu-grid { grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
+
+/* ?λ컮援щ땲 諛?寃곗젣 踰꾪듉 ?꾩껌 ?ш쾶 ?뺣? */
+.app-container.a11y-mode .cart-item-name { font-size: 1.6rem; color: #000; font-weight: 900; }
+.app-container.a11y-mode .cart-item-price { font-size: 1.6rem; color: #D32F2F; }
+.app-container.a11y-mode .cart-controls span { font-size: 1.6rem; width: 35px; }
+.app-container.a11y-mode .cart-controls button { font-size: 2.2rem; }
+.app-container.a11y-mode .total-text { font-size: 1.6rem; color: #000; font-weight: 900; }
+.app-container.a11y-mode .total-price { font-size: 3rem; color: #000; }
+.app-container.a11y-mode .pay-btn { font-size: 2.2rem; padding: 30px 70px; background: #D32F2F; box-shadow: 0 10px 20px rgba(0,0,0,0.3); }
+
+@media (max-width: 1024px) {
+  .app-container.a11y-mode .menu-grid { grid-template-columns: repeat(2, 1fr); }
+  .app-container.a11y-mode .menu-card img { height: 130px; }
+}
+
+/* =========================================================================
+   狩먲툘 [異붽???遺€遺? ?댁쟾 ?④퀎?먯꽌 ?묒뾽??AI Voice Visualizer 
+   ========================================================================= */
+.voice-visualizer-overlay {
+  position: fixed;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--mm-white-glass);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  padding: 25px 50px;
+  border-radius: 50px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 15px 40px rgba(128, 0, 32, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  z-index: 5000;
+  animation: slideUpFade 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes slideUpFade {
+  from { opacity: 0; transform: translate(-50%, 40px) scale(0.9); }
+  to { opacity: 1; transform: translate(-50%, 0) scale(1); }
+}
+
+.visualizer-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 15px;
+  height: 40px;
+}
+
+/* 鍮쏅굹???κ렐 ?ㅻ툕??(Siri / AI Orb ?먮굦) */
+.orb {
+  width: 25px;
+  height: 25px;
+  background: linear-gradient(135deg, var(--mm-accent), #B8860B, #FFD700);
+  border-radius: 50%;
+  margin-right: 15px;
+  box-shadow: 0 0 15px rgba(212, 175, 55, 0.8);
+  animation: pulseOrb 1s infinite alternate ease-in-out;
+}
+
+@keyframes pulseOrb {
+  0% { transform: scale(0.9); box-shadow: 0 0 10px rgba(212, 175, 55, 0.4); }
+  100% { transform: scale(1.3); box-shadow: 0 0 25px rgba(212, 175, 55, 1); }
+}
+
+/* ?뚰뙆瑜??섑??대뒗 留됰? (Wave Bars) */
 .wave-bar {
   width: 6px;
   height: 10px;
@@ -585,14 +780,14 @@
 }
 
 /* =========================================================================
-   ⭐️ [추가한 부분] 토스트 메시지 (알림창) UI
+   狩먲툘 [異붽???遺€遺? ?좎뒪??硫붿떆吏€ (?뚮┝李? UI
    ========================================================================= */
 .toast-message {
   position: fixed;
   bottom: 120px;
   left: 50%;
   transform: translateX(-50%);
-  background: rgba(44, 26, 26, 0.9); /* 딥 버건디 톤의 다크 배경 */
+  background: rgba(44, 26, 26, 0.9); /* ??踰꾧굔???ㅼ쓽 ?ㅽ겕 諛곌꼍 */
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   color: white;
@@ -615,3 +810,30 @@
   90% { opacity: 1; transform: translate(-50%, 0); }
   100% { opacity: 0; transform: translate(-50%, -20px); }
 }
+
+/* =========================================================================
+   ⭐️ [추가한 부분] 관리자 대시보드 반응형 스타일
+   ========================================================================= */
+.admin-container { padding: 40px; background: #f5f5f5; min-height: 100vh; font-family: 'Pretendard Variable', sans-serif; }
+.admin-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+.admin-stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 40px; }
+.admin-panel-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+.admin-table-container { overflow-x: auto; }
+
+/* 📱 태블릿/모바일 반응형 */
+@media (max-width: 1024px) {
+  .admin-container { padding: 20px; }
+  .admin-header { flex-direction: column; align-items: flex-start; gap: 15px; }
+  .admin-stats-grid { grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  .admin-panel-header { flex-direction: column; align-items: stretch; gap: 15px; }
+  .admin-panel-header input { width: 100% !important; }
+}
+
+
+
+@media (max-width: 768px) {
+  .admin-stats-grid > div { padding: 15px !important; }
+  .admin-stats-grid h3 { font-size: 1rem !important; letter-spacing: -0.5px; }
+  .admin-stats-grid > div > div:nth-child(2) { font-size: 1.3rem !important; word-break: break-word; }
+}
+
