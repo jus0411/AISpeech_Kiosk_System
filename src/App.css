@@ -837,3 +837,36 @@
   .admin-stats-grid > div > div:nth-child(2) { font-size: 1.3rem !important; word-break: break-word; }
 }
 
+/* =========================================================================
+   ⭐️ [추가한 부분] 품절 메뉴 카드 스타일 및 오버레이
+   ========================================================================= */
+.menu-card.sold-out {
+  pointer-events: none; /* 클릭 방지 */
+  opacity: 0.65;
+  filter: grayscale(40%);
+}
+.menu-card.sold-out::after {
+  content: '품 절 (SOLD OUT)';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(-10deg);
+  background: rgba(211, 47, 47, 0.95); /* 프리미엄 버건디/레드 색상 */
+  color: white;
+  padding: 8px 15px;
+  font-size: 1.1rem;
+  font-weight: 900;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  z-index: 10;
+  letter-spacing: 0.5px;
+  border: 2px solid white;
+  white-space: nowrap;
+}
+/* 접근성 모드일 때 품절 표시 크기 조정 */
+.app-container.a11y-mode .menu-card.sold-out::after {
+  font-size: 1.5rem;
+  padding: 12px 25px;
+}
+
+
