@@ -1,28 +1,28 @@
-/* ?꾨━誘몄뾼 移댄럹 ?ㅼ삤?ㅽ겕 硫붿씤 ?ㅽ???(踰꾧굔??踰좎씠吏 ?뚮쭏 & 湲?섏뒪紐⑦뵾利? */
+/* 프리미엄 카페 키오스크 메인 스타일 (버건디/베이지 테마 & 글래스모피즘) */
 
 :root {
-  /* 狩먲툘 怨좉툒?ㅻ윭??留먮쭚移댄럹 ?뚮쭏: 踰꾧굔??& 踰좎씠吏 (?좎?) */
-  --mm-primary: #800020;    /* 踰꾧굔??(硫붿씤 而щ윭) */
-  --mm-primary-hover: #a30029; /* ?몃쾭???댁쭩 諛앹? 踰꾧굔??*/
-  --mm-dark: #4A0404;       /* ??踰꾧굔??(?ъ씠?쒕컮, ?띿뒪?? */
-  --mm-light: #F5F5DC;      /* ?곕쑜??踰좎씠吏 (諛곌꼍 湲곕낯媛? */
-  --mm-light-glass: rgba(245, 245, 220, 0.75); /* 踰좎씠吏 湲?섏뒪 */
-  --mm-white-glass: rgba(255, 255, 255, 0.65); /* ?붿씠??湲?섏뒪 */
-  --mm-dark-glass: rgba(74, 4, 4, 0.85); /* ?ㅽ겕 踰꾧굔??湲?섏뒪 */
-  --mm-accent: #D4AF37;     /* ????怨⑤뱶 (?ъ씤?? */
-  --mm-text: #2c1a1a;       /* ?띿뒪????而щ윭 */
-  --mm-text-muted: #6b5a5a; /* ?고븳 ?띿뒪??*/
+  /* ⭐️ 고급스러운 말말카페 테마: 버건디 & 베이지 (유지) */
+  --mm-primary: #800020;    /* 버건디 (메인 컬러) */
+  --mm-primary-hover: #a30029; /* 호버시 살짝 밝은 버건디 */
+  --mm-dark: #4A0404;       /* 딥 버건디 (사이드바, 텍스트) */
+  --mm-light: #F5F5DC;      /* 따뜻한 베이지 (배경 기본값) */
+  --mm-light-glass: rgba(245, 245, 220, 0.75); /* 베이지 글래스 */
+  --mm-white-glass: rgba(255, 255, 255, 0.65); /* 화이트 글래스 */
+  --mm-dark-glass: rgba(74, 4, 4, 0.85); /* 다크 버건디 글래스 */
+  --mm-accent: #D4AF37;     /* 은은한 골드 (포인트) */
+  --mm-text: #2c1a1a;       /* 텍스트 딥 컬러 */
+  --mm-text-muted: #6b5a5a; /* 연한 텍스트 */
 
-  /* ?몃옖吏??諛???꾩슦??index.css??蹂???쒖슜 */
+  /* 트랜지션 및 섀도우는 index.css의 변수 활용 */
 }
 
-/* ?ㅽ겕濡ㅻ컮 而ㅼ뒪? (?꾨━誘몄뾼 猷? */
+/* 스크롤바 커스텀 (프리미엄 룩) */
 ::-webkit-scrollbar { width: 8px; height: 8px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: rgba(128, 0, 32, 0.2); border-radius: 10px; }
 ::-webkit-scrollbar-thumb:hover { background: rgba(128, 0, 32, 0.4); }
 
-/* 2. ?꾩껜 ?덉씠?꾩썐 (諛곌꼍??????留ㅼ돩 洹몃씪?곗씠?? */
+/* 2. 전체 레이아웃 (배경에 은은한 매쉬 그라데이션) */
 .app-container { 
   display: flex; 
   height: 100vh;
@@ -30,13 +30,13 @@
   width: 100vw; 
   overflow: hidden; 
   background: var(--mm-light);
-  /* ?곗븘??諛깃렇?쇱슫??洹몃씪?곗씠???④낵 */
+  /* 우아한 백그라운드 그라데이션 효과 */
   background-image: 
     radial-gradient(circle at 15% 50%, rgba(128, 0, 32, 0.03), transparent 25%),
     radial-gradient(circle at 85% 30%, rgba(212, 175, 55, 0.05), transparent 25%);
 }
 
-/* ?ъ씠?쒕컮 (醫뚯륫 硫붾돱) */
+/* 사이드바 (좌측 메뉴) */
 .sidebar { 
   flex: 0 0 13%; 
   background: var(--mm-dark-glass);
@@ -65,7 +65,7 @@
 .logo-area span { display: inline-block; animation: floatIcon 3s ease-in-out infinite; }
 @keyframes floatIcon { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
 
-/* 硫붿씤 而⑦뀒?대꼫 */
+/* 메인 컨테이너 */
 .main-container { 
   flex: 1; 
   display: flex; 
@@ -74,7 +74,7 @@
   position: relative;
 }
 
-/* ?곷떒 移댄뀒怨좊━ 諛?*/
+/* 상단 카테고리 바 */
 .category-bar { 
   display: flex; 
   background: var(--mm-white-glass); 
@@ -122,7 +122,7 @@
   transform: translateY(-2px);
 }
 
-/* ?ㅽ겕濡?硫붾돱 ?곸뿭 */
+/* 스크롤 메뉴 영역 */
 .menu-area { 
   flex: 1; 
   overflow-y: auto; 
@@ -159,13 +159,13 @@
   position: relative;
   overflow: hidden;
 }
-/* 移대뱶 ?몃쾭 ???좊땲硫붿씠??*/
+/* 카드 호버 시 애니메이션 */
 .menu-card:hover { 
   transform: translateY(-8px); 
   box-shadow: var(--shadow-lg); 
   border-color: rgba(128, 0, 32, 0.3); 
 }
-/* ?대? 鍮쏅컲???④낵 */
+/* 내부 빛반사 효과 */
 .menu-card::before {
   content: ''; position: absolute; top: 0; left: -100%; width: 50%; height: 100%;
   background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.4) 50%, rgba(255,255,255,0) 100%);
@@ -196,7 +196,7 @@
   color: var(--mm-primary); font-weight: 900; font-size: 1.3rem; font-family: var(--font-numeric);
 }
 
-/* 硫붿씤 ?섎떒 (寃곗젣 諛? */
+/* 메인 하단 (결제 바) */
 .main-bottom-area { 
   padding: 25px 40px; 
   background: var(--mm-white-glass); 
@@ -223,7 +223,7 @@
   box-shadow: 0 12px 25px rgba(128, 0, 32, 0.4); 
 }
 
-/* 二쇰Ц 而⑦뀒?대꼫 (?곗륫 ?λ컮援щ땲) - 湲?섏뒪紐⑦뵾利?*/
+/* 주문 컨테?너 (?측 ?바구니) - ?스모피?*/
 .order-container { 
   flex: 0 0 30%; min-width: 320px; max-width: 400px;
   background: var(--mm-light-glass); 
@@ -239,7 +239,7 @@
 }
 .cart-title { font-size: 1.5rem; font-weight: 900; color: var(--mm-dark); margin: 0; }
 
-/* 狩먲툘 留덉씠??踰꾪듉 (怨듯넻) - 怨좉툒?ㅻ윭??怨⑤뱶 ?ъ씤???좊땲硫붿씠??*/
+/* ⭐️ 마이??버튼 (공통) - 고급?러??골드 ?인???니메이??*/
 .mic-btn { 
   background: linear-gradient(135deg, var(--mm-accent), #B8860B); 
   color: white; border: none; border-radius: 50%; width: 60px; height: 60px; 
@@ -260,7 +260,7 @@
   100% { box-shadow: 0 0 0 0 rgba(244, 67, 54, 0); transform: scale(1.05); } 
 }
 
-/* ?λ컮援щ땲 由ъ뒪??*/
+/* ?바구니 리스??*/
 .cart-list { flex: 1; overflow-y: auto; padding: 20px; padding-bottom: 40px;}
 .cart-item { 
   background: rgba(255,255,255,0.8); 
@@ -284,7 +284,7 @@
 .delete-btn { background: none; border: none; color: #ff5252; font-size: 1.4rem; cursor: pointer; padding: 5px; transition: 0.2s; }
 .delete-btn:hover { transform: scale(1.2) rotate(90deg); }
 
-/* 紐⑤떖 & 湲?섏뒪紐⑦뵾利?*/
+/* 모달 & ?스모피?*/
 .modal { 
   position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; 
   background: rgba(0,0,0,0.5); 
@@ -310,7 +310,7 @@
 
 .modal-content h2 { text-align: center; color: var(--mm-dark); margin-top: 0; font-weight: 900; letter-spacing: -0.5px; font-size: 2rem; }
 
-/* ?듭뀡 洹몃９ */
+/* ?션 그룹 */
 .option-group { margin-bottom: 25px; }
 .option-title { font-weight: 900; font-size: 1.15rem; color: var(--mm-text); margin-bottom: 15px; display: block; border-left: 5px solid var(--mm-primary); padding-left: 12px; }
 .option-items { display: flex; gap: 12px; flex-wrap: wrap; }
@@ -321,13 +321,13 @@
 .option-item:hover { border-color: rgba(128, 0, 32, 0.3); transform: translateY(-2px); }
 .option-item.active { background: var(--mm-primary); color: white; border-color: var(--mm-primary); box-shadow: 0 4px 12px rgba(128, 0, 32, 0.25); }
 
-/* ?곸닔利?*/
+/* ?수?*/
 .receipt { 
   background: white; padding: 40px 30px; width: 380px; border-radius: 20px; 
   box-shadow: 0 20px 40px rgba(0,0,0,0.25); 
   position: relative;
 }
-.receipt::before { /* ?곸닔利??곷떒 吏洹몄옱洹??④낵 ?쒓굅, 紐⑤뜕?섍쾶 */
+.receipt::before { /* ?수??단 그재??과 ?거, 모던?게 */
   content: ''; position: absolute; top: 0; left: 0; right: 0; height: 15px; background: var(--mm-primary); border-radius: 20px 20px 0 0;
 }
 .receipt h2 { text-align: center; color: var(--mm-dark); margin-top: 5px; font-weight: 900; letter-spacing: 2px; font-size: 1.8rem;}
@@ -338,7 +338,7 @@
 }
 .close-btn:hover { background: #e0e0e0; transform: translateY(-2px); }
 
-/* 1. ?湲??붾㈃ (?꾨━誘몄뾼 ?ㅽ뵆?섏떆 ?ㅽ겕由? */
+/* 1. ???면 (?리미엄 ?플?시 ?크? */
 .splash-screen {
   position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
   background: radial-gradient(circle at center, var(--mm-dark), #2a0202);
@@ -371,14 +371,14 @@
   100% { box-shadow: 0 0 0 0 rgba(255,255,255,0); } 
 }
 
-/* 蹂댁씠???붾쾭洹?李?*/
+/* 보이???버??*/
 .voice-debug-area { 
   border-top: 1px solid rgba(255,255,255,0.1); margin-top: auto; padding-top: 20px; 
   color: var(--mm-accent); font-size: 0.9rem; line-height: 1.5; text-align: center;
   font-weight: 600;
 }
 
-/* 狩먲툘 ?ъ씠?쒕컮 ?섎떒 (異붽???踰꾪듉 ?ы븿) */
+/* ⭐️ ?이?바 ?단 (추???버튼 ?함) */
 .sidebar-bottom-area {
   margin-top: auto; width: 100%; display: flex; flex-direction: column; gap: 15px;
 }
@@ -389,10 +389,10 @@
 }
 .a11y-sidebar-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 15px rgba(0,0,0,0.3); }
 
-/* 紐⑤컮??寃곗젣 ?곸뿭 ?곗뒪?ы깙 ?④? */
+/* 모바??결제 ?역 ?스?탑 ?? */
 .mobile-pay-area { display: none; }
 
-/* ?벑 ?쒕툝由?紐⑤컮??諛섏쓳??(?붾㈃ ?덈퉬 1024px ?댄븯???? */
+/* ? ?블?모바??반응??(?면 ?비 1024px ?하???? */
 @media (max-width: 1024px) {
   .app-container { flex-direction: column; }
   .sidebar { flex: none; width: 100%; height: auto; flex-direction: row; align-items: center; justify-content: space-between; padding: 10px 20px; border-bottom: 1px solid rgba(255,255,255,0.1); border-right: none;}
@@ -444,14 +444,14 @@
 }
 
 /* =========================================================================
-   狩먲툘 [異붽???遺遺? ?λ컮援щ땲 ?쒖뒪泥?(?ㅼ??댄봽 ??젣) ?ㅽ???
+   ⭐️ [추???? ?바구니 ?스?(???프 ??) ????
    ========================================================================= */
 .cart-item-wrapper {
   position: relative;
   margin-bottom: 15px;
   border-radius: 16px;
   overflow: hidden;
-  background: white; /* cart item???ㅼ??댄봽 ?섏뿀????蹂댁씠?꾨줉 ?명똿 */
+  background: white; /* cart item?????프 ?었????보이?록 ?팅 */
 }
 .swipe-delete-bg {
   position: absolute;
@@ -473,12 +473,12 @@
 }
 
 /* =========================================================================
-   狩먲툘 [異붽???遺遺? 怨좊졊??諛??묎렐???뗫낫湲? 紐⑤뱶 ?ㅻ쾭?쇱씠???ㅽ???
+   ⭐️ [추???? 고령????근???보? 모드 ?버?이??????
    ========================================================================= */
 .app-container.a11y-mode * {
   letter-spacing: -0.5px;
 }
-/* 硫붿씤 硫붾돱 移대뱶 ?뺣? 諛?援듦쾶 泥섎━ */
+/* 메인 메뉴 카드 ?? ?굵게 처리 */
 .app-container.a11y-mode .menu-name { font-size: 1.8rem; font-weight: 900; color: #000; }
 .app-container.a11y-mode .menu-price { font-size: 1.8rem; color: #D32F2F; font-weight: 900;}
 .app-container.a11y-mode .category-title { font-size: 2.5rem; color: #000; font-weight: 900; }
@@ -491,7 +491,7 @@
 .app-container.a11y-mode .menu-card img { height: 180px; }
 .app-container.a11y-mode .menu-grid { grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
 
-/* ?λ컮援щ땲 諛?寃곗젣 踰꾪듉 ?꾩껌 ?ш쾶 ?뺣? */
+/* ?바구니 ?결제 버튼 ?청 ?게 ?? */
 .app-container.a11y-mode .cart-item-name { font-size: 1.6rem; color: #000; font-weight: 900; }
 .app-container.a11y-mode .cart-item-price { font-size: 1.6rem; color: #D32F2F; }
 .app-container.a11y-mode .cart-controls span { font-size: 1.6rem; width: 35px; }
@@ -506,7 +506,7 @@
 }
 
 /* =========================================================================
-   狩먲툘 [異붽???遺遺? ?댁쟾 ?④퀎?먯꽌 ?묒뾽??AI Voice Visualizer 
+   ⭐️ [추???? ?전 ?계?서 ?업??AI Voice Visualizer 
    ========================================================================= */
 .voice-visualizer-overlay {
   position: fixed;
@@ -541,7 +541,7 @@
   height: 40px;
 }
 
-/* 鍮쏅굹???κ렐 ?ㅻ툕??(Siri / AI Orb ?먮굦) */
+/* 빛나???근 ?브??(Siri / AI Orb ?낌) */
 .orb {
   width: 25px;
   height: 25px;
@@ -557,7 +557,7 @@
   100% { transform: scale(1.3); box-shadow: 0 0 25px rgba(212, 175, 55, 1); }
 }
 
-/* ?뚰뙆瑜??섑??대뒗 留됰? (Wave Bars) */
+/* ?파????는 막? (Wave Bars) */
 .wave-bar {
   width: 6px;
   height: 10px;
@@ -584,10 +584,10 @@
 }
 .a11y-sidebar-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 15px rgba(0,0,0,0.3); }
 
-/* 紐⑤컮??寃곗젣 ?곸뿭 ?곗뒪?ы깙 ?④? */
+/* 모바??결제 ?역 ?스?탑 ?? */
 .mobile-pay-area { display: none; }
 
-/* ?벑 ?쒕툝由?紐⑤컮??諛섏쓳??(?붾㈃ ?덈퉬 1024px ?댄븯???? */
+/* ? ?블?모바??반응??(?면 ?비 1024px ?하???? */
 @media (max-width: 1024px) {
   .app-container { flex-direction: column; }
   .sidebar { flex: none; width: 100%; height: auto; flex-direction: row; align-items: center; justify-content: space-between; padding: 10px 20px; border-bottom: 1px solid rgba(255,255,255,0.1); border-right: none;}
@@ -639,14 +639,14 @@
 }
 
 /* =========================================================================
-   狩먲툘 [異붽???遺€遺? ?λ컮援щ땲 ?쒖뒪泥?(?ㅼ??댄봽 ??젣) ?ㅽ???
+   ⭐️ [추???붢? ?바구니 ?스?(???프 ??) ????
    ========================================================================= */
 .cart-item-wrapper {
   position: relative;
   margin-bottom: 15px;
   border-radius: 16px;
   overflow: hidden;
-  background: white; /* cart item???ㅼ??댄봽 ?섏뿀????蹂댁씠?꾨줉 ?명똿 */
+  background: white; /* cart item?????프 ?었????보이?록 ?팅 */
 }
 .swipe-delete-bg {
   position: absolute;
@@ -668,12 +668,12 @@
 }
 
 /* =========================================================================
-   狩먲툘 [異붽???遺€遺? 怨좊졊??諛??묎렐???뗫낫湲? 紐⑤뱶 ?ㅻ쾭?쇱씠???ㅽ???
+   ⭐️ [추???붢? 고령????근???보? 모드 ?버?이??????
    ========================================================================= */
 .app-container.a11y-mode * {
   letter-spacing: -0.5px;
 }
-/* 硫붿씤 硫붾돱 移대뱶 ?뺣? 諛?援듦쾶 泥섎━ */
+/* 메인 메뉴 카드 ?? ?굵게 처리 */
 .app-container.a11y-mode .menu-name { font-size: 1.8rem; font-weight: 900; color: #000; }
 .app-container.a11y-mode .menu-price { font-size: 1.8rem; color: #D32F2F; font-weight: 900;}
 .app-container.a11y-mode .category-title { font-size: 2.5rem; color: #000; font-weight: 900; }
@@ -686,7 +686,7 @@
 .app-container.a11y-mode .menu-card img { height: 180px; }
 .app-container.a11y-mode .menu-grid { grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
 
-/* ?λ컮援щ땲 諛?寃곗젣 踰꾪듉 ?꾩껌 ?ш쾶 ?뺣? */
+/* ?바구니 ?결제 버튼 ?청 ?게 ?? */
 .app-container.a11y-mode .cart-item-name { font-size: 1.6rem; color: #000; font-weight: 900; }
 .app-container.a11y-mode .cart-item-price { font-size: 1.6rem; color: #D32F2F; }
 .app-container.a11y-mode .cart-controls span { font-size: 1.6rem; width: 35px; }
@@ -701,7 +701,7 @@
 }
 
 /* =========================================================================
-   狩먲툘 [異붽???遺€遺? ?댁쟾 ?④퀎?먯꽌 ?묒뾽??AI Voice Visualizer 
+   ⭐️ [추???붢? ?전 ?계?서 ?업??AI Voice Visualizer 
    ========================================================================= */
 .voice-visualizer-overlay {
   position: fixed;
@@ -736,7 +736,7 @@
   height: 40px;
 }
 
-/* 鍮쏅굹???κ렐 ?ㅻ툕??(Siri / AI Orb ?먮굦) */
+/* 빛나???근 ?브??(Siri / AI Orb ?낌) */
 .orb {
   width: 25px;
   height: 25px;
@@ -752,7 +752,7 @@
   100% { transform: scale(1.3); box-shadow: 0 0 25px rgba(212, 175, 55, 1); }
 }
 
-/* ?뚰뙆瑜??섑??대뒗 留됰? (Wave Bars) */
+/* ?파????는 막? (Wave Bars) */
 .wave-bar {
   width: 6px;
   height: 10px;
@@ -780,14 +780,14 @@
 }
 
 /* =========================================================================
-   狩먲툘 [異붽???遺€遺? ?좎뒪??硫붿떆吏€ (?뚮┝李? UI
+   ⭐️ [추???붢? ?스??메시짢 (?림? UI
    ========================================================================= */
 .toast-message {
   position: fixed;
   bottom: 120px;
   left: 50%;
   transform: translateX(-50%);
-  background: rgba(44, 26, 26, 0.9); /* ??踰꾧굔???ㅼ쓽 ?ㅽ겕 諛곌꼍 */
+  background: rgba(44, 26, 26, 0.9); /* ??버건???의 ?크 배경 */
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   color: white;
@@ -868,5 +868,4 @@
   font-size: 1.5rem;
   padding: 12px 25px;
 }
-
 
